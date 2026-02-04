@@ -1,0 +1,18 @@
+node_modules/
+.DS_Store
+*.log
+
+# SvelteKit
+.svelte-kit/
+
+# Build output
+dist/
+build/
+
+# Vite+
+.vite/
+
+# Project-specific Claude Code config
+CLAUDE.md
+.claude/
+TODO.md
