@@ -21,19 +21,25 @@ const OPEN_COMMANDS: Record<string, string> = {
 const app = new Hono();
 app.route("/api", api);
 
-const CLIENT_DIR = fs.existsSync(join(__dirname, "client"))
-  ? join(__dirname, "client")
-  : join(__dirname, "../dist/client");
+// Primary = bundled layout (dist/server.mjs alongside dist/client/).
+// Fallback = source-run layout (src/server/ -> repo root -> dist/client/).
+// In dev neither exists; Vite middleware in dev.ts serves the SPA instead.
+const CLIENT_DIR =
+  [join(__dirname, "client"), join(__dirname, "../../dist/client")].find((p) =>
+    fs.existsSync(p),
+  ) ?? null;
 
-app.use("/*", serveStatic({ root: CLIENT_DIR }));
-app.get("*", (c) => {
-  const indexPath = join(CLIENT_DIR, "index.html");
-  try {
-    return c.html(fs.readFileSync(indexPath, "utf-8"));
-  } catch {
-    return c.text("Not found", 404);
-  }
-});
+if (CLIENT_DIR) {
+  app.use("/*", serveStatic({ root: CLIENT_DIR }));
+  app.get("*", (c) => {
+    const indexPath = join(CLIENT_DIR, "index.html");
+    try {
+      return c.html(fs.readFileSync(indexPath, "utf-8"));
+    } catch {
+      return c.text("Not found", 404);
+    }
+  });
+}
 
 export function openBrowser(url: string) {
   const openCmd = OPEN_COMMANDS[process.platform] ?? "xdg-open";
