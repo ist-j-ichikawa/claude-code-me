@@ -1,6 +1,9 @@
 import { getRequestListener } from "@hono/node-server";
 import { createServer as createViteServer } from "vite";
 import http from "node:http";
+import fs from "node:fs";
+import os from "node:os";
+import { join } from "node:path";
 import { app, HOSTNAME, PORT, openBrowser } from "./index";
 
 const httpServer = http.createServer();
@@ -22,5 +25,12 @@ httpServer.on("request", (req, res) => {
 httpServer.listen(PORT, HOSTNAME, () => {
   const url = `http://${HOSTNAME}:${PORT}`;
   console.log(`Claude Code Me (dev): ${url}`);
-  openBrowser(url);
+  // tsx watch restarts this process on every file change. Use the watcher's
+  // pid (our ppid) as a sentinel so we only open the browser once per
+  // `pnpm dev` session, not on every reload.
+  const sentinel = join(os.tmpdir(), `ccme-dev-${process.ppid}.lock`);
+  if (!fs.existsSync(sentinel)) {
+    fs.writeFileSync(sentinel, String(Date.now()));
+    openBrowser(url);
+  }
 });
