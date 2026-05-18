@@ -11,7 +11,7 @@
 	<DataTable columns={['File', 'Size']} items={items} emptyText="メモリファイルがありません">
 		{#snippet row(item)}
 			{@const f = item as TreeNode}
-			<tr class="clickable" onclick={() => { window.location.hash = `#/scope/${scopeId}/file/memory:${f.name}`; }}>
+			<tr class="clickable" onclick={() => { window.location.hash = `#/scope/${scopeId}/file/${config.scope}:memory/${f.name}`; }}>
 				<td style="font-weight:500;color:var(--text)">{f.name}</td>
 				<td class="file-path">{f.size ? `${(f.size / 1024).toFixed(1)} KB` : ''}</td>
 			</tr>

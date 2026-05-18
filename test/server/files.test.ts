@@ -6,8 +6,8 @@ import {
   listJsonlFiles,
   readDirRecursive,
   readJsonFile,
-  resolveZoneDir,
-  PARENT_ALLOWLIST,
+  resolveScopeDir,
+  PROJECT_ROOT_ALLOWLIST,
 } from "../../src/server/files";
 
 // --- listJsonlFiles ---
@@ -114,61 +114,60 @@ describe("readJsonFile", () => {
   });
 });
 
-// --- resolveZoneDir ---
+// --- resolveScopeDir ---
 
-describe("resolveZoneDir", () => {
+describe("resolveScopeDir", () => {
   const resolved = {
     scope: "project" as const,
     claudeDir: "/home/.claude/projects/foo",
-    parentDir: "/home/projects/foo",
+    projectCwd: "/home/projects/foo",
     projectClaudeDir: "/home/projects/foo/.claude",
   };
 
-  it("zone=claude は claudeDir を返す", () => {
-    expect(resolveZoneDir(resolved, "claude", "any-file")).toBe(resolved.claudeDir);
+  it("scope=user は claudeDir を返す", () => {
+    expect(resolveScopeDir(resolved, "user", "any-file")).toBe(resolved.claudeDir);
   });
 
-  it("zone=projectClaude は projectClaudeDir を返す", () => {
-    expect(resolveZoneDir(resolved, "projectClaude", "any-file")).toBe(resolved.projectClaudeDir);
+  it("scope=project は projectClaudeDir を返す", () => {
+    expect(resolveScopeDir(resolved, "project", "settings.json")).toBe(resolved.projectClaudeDir);
   });
 
-  it("zone=memory は claudeDir/memory を返す", () => {
-    expect(resolveZoneDir(resolved, "memory", "any-file")).toBe(
-      path.join(resolved.claudeDir, "memory"),
-    );
+  it("scope=project + path=memory/... は session memory (claudeDir) を返す", () => {
+    expect(resolveScopeDir(resolved, "project", "memory/foo.md")).toBe(resolved.claudeDir);
+    expect(resolveScopeDir(resolved, "project", "memory")).toBe(resolved.claudeDir);
   });
 
-  it("zone=parent でホワイトリストのファイルは parentDir を返す", () => {
-    for (const allowed of PARENT_ALLOWLIST) {
-      expect(resolveZoneDir(resolved, "parent", allowed)).toBe(resolved.parentDir);
+  it("scope=project + PROJECT_ROOT_ALLOWLIST のファイルは projectCwd を返す", () => {
+    for (const allowed of PROJECT_ROOT_ALLOWLIST) {
+      expect(resolveScopeDir(resolved, "project", allowed)).toBe(resolved.projectCwd);
     }
   });
 
-  it("zone=parent でホワイトリスト外のファイルは null を返す", () => {
-    expect(resolveZoneDir(resolved, "parent", "package.json")).toBeNull();
+  it("scope=project + allowlist 外でも projectClaudeDir にフォールバック", () => {
+    expect(resolveScopeDir(resolved, "project", "package.json")).toBe(resolved.projectClaudeDir);
   });
 
-  it("parentDir が null のとき zone=parent は null を返す", () => {
-    const noParent = { ...resolved, parentDir: null };
-    expect(resolveZoneDir(noParent, "parent", "CLAUDE.md")).toBeNull();
+  it("projectCwd が null のとき scope=project + CLAUDE.md は projectClaudeDir を返す", () => {
+    const noParent = { ...resolved, projectCwd: null };
+    expect(resolveScopeDir(noParent, "project", "CLAUDE.md")).toBe(resolved.projectClaudeDir);
   });
 
-  it("projectClaudeDir が null のとき zone=projectClaude は null を返す", () => {
+  it("projectClaudeDir が null のとき scope=project は null を返す", () => {
     const noProject = { ...resolved, projectClaudeDir: null };
-    expect(resolveZoneDir(noProject, "projectClaude", "any")).toBeNull();
+    expect(resolveScopeDir(noProject, "project", "any")).toBeNull();
   });
 
-  it("不明な zone は null を返す", () => {
-    expect(resolveZoneDir(resolved, "unknown", "any")).toBeNull();
+  it("不明な scope は null を返す", () => {
+    expect(resolveScopeDir(resolved, "unknown", "any")).toBeNull();
   });
 
   it("パストラバーサル (../) を含むパスは null を返すこと", () => {
-    expect(resolveZoneDir(resolved, "claude", "../../etc/passwd")).toBeNull();
-    expect(resolveZoneDir(resolved, "memory", "../secret")).toBeNull();
-    expect(resolveZoneDir(resolved, "projectClaude", "../../.env")).toBeNull();
+    expect(resolveScopeDir(resolved, "user", "../../etc/passwd")).toBeNull();
+    expect(resolveScopeDir(resolved, "project", "../secret")).toBeNull();
+    expect(resolveScopeDir(resolved, "project", "../../.env")).toBeNull();
   });
 
   it("絶対パスは null を返すこと", () => {
-    expect(resolveZoneDir(resolved, "claude", "/etc/passwd")).toBeNull();
+    expect(resolveScopeDir(resolved, "user", "/etc/passwd")).toBeNull();
   });
 });

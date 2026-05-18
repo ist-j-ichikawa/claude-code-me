@@ -40,8 +40,8 @@ export async function fetchVersion() {
   return data.version;
 }
 
-export async function fetchFile(scopeId: string, zone: string, path: string) {
-  const res = await client.file.$get({ query: { scopeId, zone, path } });
+export async function fetchFile(scopeId: string, scope: string, path: string) {
+  const res = await client.file.$get({ query: { scopeId, scope, path } });
   if (!res.ok) throw new Error(`/api/file failed: ${res.status}`);
   return res.text();
 }

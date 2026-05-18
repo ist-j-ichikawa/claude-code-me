@@ -4,7 +4,6 @@
 
 	let { data } = $props();
 	let items = $derived(((data.config.skills ?? []) as TreeNode[]).filter(f => f.type === 'dir'));
-	let zone = $derived(data.config.projectClaudeDir ? 'projectClaude' : 'claude');
 </script>
 
 <div class="animate-in">
@@ -14,7 +13,8 @@
 		{#snippet row(item)}
 			{@const f = item as TreeNode}
 			{@const mdFile = (f.children ?? []).find(c => c.name.endsWith('.md'))}
-			<tr class="clickable" onclick={() => { if (mdFile) window.location.hash = `#/scope/${data.scopeId}/file/${zone}:skills/${f.name}/${mdFile.name}`; }}>
+			{@const scope = f.scope}
+			<tr class="clickable" onclick={() => { if (mdFile) window.location.hash = `#/scope/${data.scopeId}/file/${scope}:skills/${f.name}/${mdFile.name}`; }}>
 				<td style="font-weight:500;color:var(--text)">{f.name}</td>
 				<td class="file-path">{mdFile?.name ?? ''}</td>
 			</tr>

@@ -9,6 +9,12 @@ export const HOOK_EVENTS: Record<
     canBlock: false,
     matchers: ["startup", "resume", "clear", "compact"],
   },
+  Setup: {
+    desc: "`claude -p --init` / `claude -p --maintenance` の print mode セッション開始前に発火します。command-type hook のみサポート。",
+    timing: "print mode セットアップ時",
+    canBlock: false,
+    matchers: ["init", "maintenance"],
+  },
   SessionEnd: {
     desc: "セッション終了時に発火します。",
     timing: "セッション終了時",
