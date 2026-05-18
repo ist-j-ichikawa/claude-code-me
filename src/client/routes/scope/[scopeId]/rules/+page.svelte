@@ -4,7 +4,6 @@
 
 	let { data } = $props();
 	let items = $derived(((data.config.rules ?? []) as TreeNode[]).filter(f => f.type === 'file'));
-	let zone = $derived(data.config.projectClaudeDir ? 'projectClaude' : 'claude');
 </script>
 
 <div class="animate-in">
@@ -13,7 +12,8 @@
 	<DataTable columns={['Rule Name', 'File']} items={items} emptyText="ルールが設定されていません">
 		{#snippet row(item)}
 			{@const f = item as TreeNode}
-			<tr class="clickable" onclick={() => { window.location.hash = `#/scope/${data.scopeId}/file/${zone}:rules/${f.name}`; }}>
+			{@const scope = f.scope}
+			<tr class="clickable" onclick={() => { window.location.hash = `#/scope/${data.scopeId}/file/${scope}:rules/${f.name}`; }}>
 				<td style="font-weight:500;color:var(--text)">{f.name.replace('.md', '')}</td>
 				<td class="file-path">{f.name}</td>
 			</tr>

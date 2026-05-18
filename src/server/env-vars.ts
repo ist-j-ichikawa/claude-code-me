@@ -35,6 +35,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "ANTHROPIC_FOUNDRY_RESOURCE", description: "Foundry リソース名" },
   { name: "ANTHROPIC_VERTEX_PROJECT_ID", description: "GCP プロジェクト ID" },
   { name: "ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION", description: "Haiku モデル AWS リージョン" },
+  { name: "ANTHROPIC_WORKSPACE_ID", description: "workload identity federation 用 workspace スコープ (2.1.141+)" },
   { name: "GCLOUD_PROJECT", description: "GCP プロジェクト ID (Vertex)" },
   { name: "GOOGLE_CLOUD_PROJECT", description: "GCP プロジェクト ID (Vertex 代替)" },
 
@@ -45,6 +46,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME", description: "Haiku モデル表示名" },
   { name: "ANTHROPIC_DEFAULT_HAIKU_MODEL_DESCRIPTION", description: "Haiku モデル説明" },
   { name: "ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES", description: "Haiku 対応機能" },
+  { name: "CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE", description: "Fast mode を Opus 4.6 にピン留め (2.1.142+、default は Opus 4.7)" },
   { name: "ANTHROPIC_DEFAULT_OPUS_MODEL", description: "デフォルト Opus モデル ID" },
   { name: "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME", description: "Opus モデル表示名" },
   { name: "ANTHROPIC_DEFAULT_OPUS_MODEL_DESCRIPTION", description: "Opus モデル説明" },
@@ -80,6 +82,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_OTEL_SHUTDOWN_TIMEOUT_MS", description: "OTel シャットダウンタイムアウト" },
   { name: "CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS", description: "プラグイン git 操作タイムアウト" },
   { name: "CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS", description: "SessionEnd フック時間予算 (default 1500)" },
+  { name: "CLAUDE_CODE_STOP_HOOK_BLOCK_CAP", description: "Stop フックの連続ブロック上限 (default 8、2.1.143+)" },
   { name: "MAX_THINKING_TOKENS", description: "拡張思考最大トークン数" },
 
   // --- Display / UI / accessibility ---
@@ -173,7 +176,8 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_GIT_BASH_PATH", description: "Git Bash 実行ファイルパス (Windows)" },
   { name: "CLAUDE_CODE_SHELL", description: "シェル自動検出上書き" },
   { name: "CLAUDE_CODE_SHELL_PREFIX", description: "シェルコマンドプレフィックス (ロギング用)" },
-  { name: "CLAUDE_CODE_USE_POWERSHELL_TOOL", description: "PowerShell ツール有効化 (Windows opt-in、macOS/Linux opt-in、2.1.130+)" },
+  { name: "CLAUDE_CODE_USE_POWERSHELL_TOOL", description: "PowerShell ツール有効化 (Windows は 2.1.143+ で Bedrock/Vertex/Foundry default 有効、`=0` で opt-out)" },
+  { name: "CLAUDE_CODE_POWERSHELL_RESPECT_EXECUTION_POLICY", description: "PowerShell ツールの `-ExecutionPolicy Bypass` opt-out (2.1.143+)" },
   { name: "CLAUDE_CONFIG_DIR", description: "Claude 設定ディレクトリ override (default: ~/.claude/)" },
   { name: "CLAUDE_ENV_FILE", description: "SessionStart hook が読み込む環境変数定義ファイル" },
   { name: "CLAUDE_EFFORT", description: "Bash tool 内で参照可能な effort level (skill 内では ${CLAUDE_EFFORT})" },
@@ -182,6 +186,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE", description: "パッケージマネージャー自動更新" },
   { name: "CLAUDE_CODE_PLUGIN_CACHE_DIR", description: "プラグインルートディレクトリパス" },
   { name: "CLAUDE_CODE_PLUGIN_KEEP_MARKETPLACE_ON_FAILURE", description: "マーケットプレイス失敗時キャッシュ保持" },
+  { name: "CLAUDE_CODE_PLUGIN_PREFER_HTTPS", description: "GitHub プラグインを SSH ではなく HTTPS でクローン (2.1.141+)" },
   { name: "CLAUDE_CODE_PLUGIN_SEED_DIR", description: "プラグインシードディレクトリパス" },
   { name: "CLAUDE_CODE_SYNC_PLUGIN_INSTALL", description: "プラグインインストール同期" },
 

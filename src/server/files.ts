@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { ResolvedScope, Zone } from "./types";
+import type { ResolvedScope, ScopeType } from "./types";
 
 /** Tree node for directory listing. */
 export interface TreeNode {
@@ -11,8 +11,8 @@ export interface TreeNode {
   children?: TreeNode[];
 }
 
-/** Files allowed to be served from the parent zone. */
-export const PARENT_ALLOWLIST = new Set(["CLAUDE.md", ".mcp.json"]);
+/** Files served from the project root (cwd) rather than cwd/.claude/. */
+export const PROJECT_ROOT_ALLOWLIST = new Set(["CLAUDE.md", ".mcp.json"]);
 
 /** Reserved JSONL filenames in ~/.claude/ that are not user sessions. */
 const NON_SESSION_JSONL = new Set(["history.jsonl"]);
@@ -71,24 +71,31 @@ export function readJsonFile(filePath: string): Record<string, unknown> | null {
 }
 
 /**
- * Resolve a zone + filePath to a base directory.
- * Enforces PARENT_ALLOWLIST for the parent zone.
+ * Resolve a scope + filePath to a base directory.
+ * - scope=user: file lives under `~/.claude/`.
+ * - scope=project: `CLAUDE.md` / `.mcp.json` live at the project root (cwd);
+ *   `memory/*` lives under the project's session directory; everything else
+ *   lives under `<cwd>/.claude/`.
  * Rejects path traversal attempts (.. or absolute paths).
  */
-export function resolveZoneDir(
-  resolved: Pick<ResolvedScope, "claudeDir" | "parentDir" | "projectClaudeDir">,
-  zone: Zone | string,
+export function resolveScopeDir(
+  resolved: Pick<ResolvedScope, "claudeDir" | "projectCwd" | "projectClaudeDir">,
+  scope: ScopeType | string,
   filePath: string,
 ): string | null {
-  // Reject traversal attempts
   const normalized = path.normalize(filePath);
   if (normalized.startsWith("..") || path.isAbsolute(normalized)) return null;
 
-  if (zone === "claude") return resolved.claudeDir;
-  if (zone === "parent" && resolved.parentDir) {
-    return PARENT_ALLOWLIST.has(normalized) ? resolved.parentDir : null;
+  if (scope === "user") return resolved.claudeDir;
+
+  if (scope === "project") {
+    if (PROJECT_ROOT_ALLOWLIST.has(normalized) && resolved.projectCwd) {
+      return resolved.projectCwd;
+    }
+    if (normalized === "memory" || normalized.startsWith("memory/")) {
+      return resolved.claudeDir;
+    }
+    if (resolved.projectClaudeDir) return resolved.projectClaudeDir;
   }
-  if (zone === "projectClaude" && resolved.projectClaudeDir) return resolved.projectClaudeDir;
-  if (zone === "memory") return path.join(resolved.claudeDir, "memory");
   return null;
 }

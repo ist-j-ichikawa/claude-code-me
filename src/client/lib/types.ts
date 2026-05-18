@@ -1,8 +1,5 @@
-/** Scope type */
+/** Scope (Claude Code official term): user-global or project-specific. */
 export type ScopeType = "user" | "project";
-
-/** Zone type */
-export type Zone = "claude" | "parent" | "projectClaude" | "memory";
 
 /** Scope entry from /api/scopes */
 export interface ScopeEntry {
@@ -17,7 +14,7 @@ export interface ScopeEntry {
 
 /** File reference */
 export interface FileRef {
-  zone: Zone;
+  scope: ScopeType;
   path: string;
   name?: string;
   size?: number;
@@ -30,6 +27,8 @@ export interface TreeNode {
   type: "file" | "dir";
   size?: number;
   children?: TreeNode[];
+  /** Which scope contributed this entry. Always set on /api/config responses. */
+  scope: ScopeType;
 }
 
 /** Full config from /api/config */
@@ -37,9 +36,12 @@ export interface ScopeConfig {
   scope: ScopeType;
   scopeId: string;
   claudeDir: string;
-  parentDir: string | null;
+  projectCwd: string | null;
   projectClaudeDir: string | null;
+  /** Project scope: User+Project deep-merged effective values. */
   settings: Record<string, unknown> | null;
+  /** Project scope only: per-top-level-key scope. */
+  settingsProvenance?: Record<string, ScopeType>;
   settingsLocal: Record<string, unknown> | null;
   claudeMd: FileRef | null;
   mcpJson: { content: Record<string, unknown> } | null;
@@ -50,6 +52,7 @@ export interface ScopeConfig {
   agents: TreeNode[];
   memory: TreeNode[];
   sessionCount: number;
+  /** Project scope only: raw user settings (pre-merge). */
   userSettings?: Record<string, unknown> | null;
 }
 

@@ -30,7 +30,7 @@
 	// Conditionally show CLAUDE.md if it exists
 	let allItems = $derived(
 		config.claudeMd
-			? [items[0], { view: `file/${config.claudeMd.zone}:${config.claudeMd.path}`, label: 'CLAUDE.md' }, ...items.slice(1)]
+			? [items[0], { view: `file/${config.claudeMd.scope}:${config.claudeMd.path}`, label: 'CLAUDE.md' }, ...items.slice(1)]
 			: items
 	);
 

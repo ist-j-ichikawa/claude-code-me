@@ -45,12 +45,12 @@ describe("API E2E (app.request)", () => {
   });
 
   it("GET /api/file でパストラバーサルを拒否すること", async () => {
-    const res = await app.request("/api/file?scopeId=user&zone=claude&path=../../etc/passwd");
+    const res = await app.request("/api/file?scopeId=user&scope=user&path=../../etc/passwd");
     expect(res.status).toBe(403);
   });
 
-  it("GET /api/file で zone が空の場合 Zod が 400 を返すこと", async () => {
-    const res = await app.request("/api/file?scopeId=user&zone=&path=test");
+  it("GET /api/file で scope が空の場合 Zod が 400 を返すこと", async () => {
+    const res = await app.request("/api/file?scopeId=user&scope=&path=test");
     expect(res.status).toBe(400);
   });
 

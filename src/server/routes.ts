@@ -6,7 +6,7 @@ import fs from "node:fs";
 import { discoverScopes, resolveScope } from "./scopes";
 import { buildConfig, HOME_CLAUDE_DIR } from "./config";
 import { getSessions } from "./sessions";
-import { readDirRecursive, resolveZoneDir, readJsonFile } from "./files";
+import { readDirRecursive, resolveScopeDir, readJsonFile } from "./files";
 import { CLAUDE_CODE_ENV_VARS } from "./env-vars";
 import { getHistory } from "./history";
 
@@ -14,11 +14,11 @@ const scopeQuery = z.object({
   scopeId: z.string().default("user"),
 });
 
-const ZONES = ["claude", "parent", "projectClaude", "memory"] as const;
+const SCOPES = ["user", "project"] as const;
 
 const fileQuery = z.object({
   scopeId: z.string().default("user"),
-  zone: z.enum(ZONES),
+  scope: z.enum(SCOPES),
   path: z.string().min(1, "path is required"),
 });
 
@@ -90,13 +90,13 @@ const api = new Hono()
     }
   })
   .get("/file", zValidator("query", fileQuery), (c) => {
-    const { scopeId, zone, path: filePath } = c.req.valid("query");
+    const { scopeId, scope, path: filePath } = c.req.valid("query");
 
     const resolved = resolveScope(scopeId, HOME_CLAUDE_DIR);
     if (!resolved) return c.text("Scope not found", 404);
 
-    const baseDir = resolveZoneDir(resolved, zone, filePath);
-    if (!baseDir) return c.text("Forbidden: invalid zone or path", 403);
+    const baseDir = resolveScopeDir(resolved, scope, filePath);
+    if (!baseDir) return c.text("Forbidden: invalid scope or path", 403);
 
     const full = resolve(join(baseDir, filePath));
     if (!full.startsWith(baseDir + sep) && full !== baseDir) {

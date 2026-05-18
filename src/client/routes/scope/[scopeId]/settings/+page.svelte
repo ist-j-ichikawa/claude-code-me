@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Section from '$lib/components/Section.svelte';
-	import InfoGrid from '$lib/components/InfoGrid.svelte';
+	import InfoGrid, { type InfoItem } from '$lib/components/InfoGrid.svelte';
 	import TagList from '$lib/components/TagList.svelte';
 	import JsonViewer from '$lib/components/JsonViewer.svelte';
 
@@ -9,12 +9,12 @@
 	let s = $derived((config.settings ?? {}) as Record<string, unknown>);
 
 	let generalItems = $derived(
-		([
-			s.language && ['Language', s.language],
-			s.outputStyle && ['Output Style', s.outputStyle],
-			s.model && ['Model', s.model],
-			s.autoUpdatesChannel && ['Updates Channel', s.autoUpdatesChannel],
-		].filter(Boolean) as [string, string][])
+		[
+			s.language && { label: 'Language', value: String(s.language) },
+			s.outputStyle && { label: 'Output Style', value: String(s.outputStyle) },
+			s.model && { label: 'Model', value: String(s.model) },
+			s.autoUpdatesChannel && { label: 'Updates Channel', value: String(s.autoUpdatesChannel) },
+		].filter((x): x is InfoItem => !!x),
 	);
 
 	let perms = $derived(s.permissions as Record<string, unknown> | undefined);
@@ -58,9 +58,9 @@
 	{#if attribution}
 		<Section title="Attribution">
 			<InfoGrid items={[
-				attribution.commit !== undefined ? ['Commit Message', String(attribution.commit || '(empty)')] : null,
-				attribution.pr !== undefined ? ['PR Message', String(attribution.pr || '(empty)')] : null,
-			].filter(Boolean) as [string, string][]} />
+				attribution.commit !== undefined ? { label: 'Commit Message', value: String(attribution.commit || '(empty)') } : null,
+				attribution.pr !== undefined ? { label: 'PR Message', value: String(attribution.pr || '(empty)') } : null,
+			].filter((x): x is InfoItem => x !== null)} />
 		</Section>
 	{/if}
 

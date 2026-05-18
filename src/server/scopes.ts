@@ -159,7 +159,7 @@ export function discoverScopes(homeClaudeDir: string): ScopeEntry[] {
  */
 export function resolveScope(scopeId: string, homeClaudeDir: string): ResolvedScope | null {
   if (scopeId === "user" || !scopeId) {
-    return { scope: "user", claudeDir: homeClaudeDir, parentDir: null, projectClaudeDir: null };
+    return { scope: "user", claudeDir: homeClaudeDir, projectCwd: null, projectClaudeDir: null };
   }
 
   const claudeDir = path.join(homeClaudeDir, "projects", scopeId);
@@ -168,5 +168,5 @@ export function resolveScope(scopeId: string, homeClaudeDir: string): ResolvedSc
   const { cwd } = resolveCwdFromJsonl(claudeDir);
   const projectClaudeDir = cwd ? path.join(cwd, ".claude") : null;
 
-  return { scope: "project", claudeDir, parentDir: cwd, projectClaudeDir };
+  return { scope: "project", claudeDir, projectCwd: cwd, projectClaudeDir };
 }

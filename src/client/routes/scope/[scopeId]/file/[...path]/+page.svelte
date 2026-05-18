@@ -11,7 +11,7 @@
 
 <div class="animate-in">
 	<h2>File Viewer</h2>
-	<p class="file-path">{data.zone}:{data.filePath}</p>
+	<p class="file-path">{data.scope}:{data.filePath}</p>
 
 	{#if data.error}
 		<div class="error">{data.content}</div>

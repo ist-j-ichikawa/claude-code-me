@@ -140,7 +140,7 @@ describe("resolveScope", () => {
     expect(result).not.toBeNull();
     expect(result!.scope).toBe("user");
     expect(result!.claudeDir).toBe(tmp.get());
-    expect(result!.parentDir).toBeNull();
+    expect(result!.projectCwd).toBeNull();
   });
 
   it("存在するプロジェクトスコープを解決すること", () => {
@@ -152,7 +152,7 @@ describe("resolveScope", () => {
     const result = resolveScope("test-proj", tmp.get());
     expect(result).not.toBeNull();
     expect(result!.scope).toBe("project");
-    expect(result!.parentDir).toBe("/Users/user/test");
+    expect(result!.projectCwd).toBe("/Users/user/test");
     expect(result!.projectClaudeDir).toBe("/Users/user/test/.claude");
   });
 

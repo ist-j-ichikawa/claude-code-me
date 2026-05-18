@@ -1,21 +1,18 @@
 <script lang="ts">
-	import type { ScopeEntry, ScopeConfig } from '$lib/types';
+	import type { ScopeEntry } from '$lib/types';
 	import ScopeList from './ScopeList.svelte';
 
 	let {
 		scopes,
-		projectConfig,
 		currentScopeId,
 		ccVersion,
 	}: {
 		scopes: ScopeEntry[];
-		projectConfig: ScopeConfig | null;
 		currentScopeId: string;
 		ccVersion: string | null;
 	} = $props();
 
 	let isUserActive = $derived(currentScopeId === 'user');
-	let projectDisplayName = $derived(scopes.find((s) => s.id === currentScopeId)?.displayName ?? '');
 </script>
 
 <aside class="sidebar">
@@ -30,27 +27,14 @@
 		<div class="tracking-badge">Claude Code v{ccVersion} tracking</div>
 	{/if}
 
-	<!-- User: single link to the unified hub -->
 	<div class="sidebar-section">
 		<a href="#/scope/user/dashboard" class="user-link" class:active={isUserActive}>user</a>
 	</div>
 
-	<div class="sidebar-divider"></div>
-
-	<!-- Project list: always visible, takes remaining vertical space -->
 	<div class="sidebar-section sidebar-section-flex">
 		<div class="section-label">PROJECTS</div>
 		<ScopeList {scopes} {currentScopeId} />
 	</div>
-
-	<!-- Project path: shown only when a project is selected (no nav — sections live in the hub page) -->
-	{#if projectConfig}
-		<div class="sidebar-divider"></div>
-
-		<div class="sidebar-section">
-			<div class="project-path">{projectDisplayName}</div>
-		</div>
-	{/if}
 </aside>
 
 <style>
@@ -109,11 +93,6 @@
 		overflow: hidden;
 	}
 
-	.sidebar-divider {
-		border-top: 1px solid var(--border-light);
-		margin: 8px 16px;
-	}
-
 	.user-link {
 		display: block;
 		padding: 8px 16px 4px;
@@ -143,15 +122,6 @@
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 		padding: 8px 16px 4px;
-	}
-
-	.project-path {
-		font-size: 12px;
-		color: var(--text-secondary);
-		padding: 8px 16px;
-		word-break: break-all;
-		line-height: 1.4;
-		font-family: var(--font-code);
 	}
 
 	.tracking-badge {

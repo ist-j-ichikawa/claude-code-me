@@ -7,7 +7,6 @@
 <div class="app-grid">
 	<Sidebar
 		scopes={data.scopes}
-		projectConfig={data.isProject ? data.config : null}
 		currentScopeId={data.scopeId}
 		ccVersion={data.ccVersion}
 	/>

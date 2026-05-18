@@ -1,13 +1,24 @@
 <script lang="ts">
-	let { items }: { items: [string, string][] } = $props();
+	import ScopeBadge from './ScopeBadge.svelte';
+	import type { ScopeType } from '$lib/types';
+
+	export interface InfoItem {
+		label: string;
+		value: string;
+		scope?: ScopeType;
+	}
+	let { items }: { items: InfoItem[] } = $props();
 </script>
 
 {#if items.length > 0}
 	<div class="info-grid">
-		{#each items as [label, value]}
+		{#each items as item}
 			<div class="info-item">
-				<span class="info-label">{label}</span>
-				<span class="info-value">{value}</span>
+				<span class="info-label">
+					{item.label}
+					{#if item.scope}<ScopeBadge scope={item.scope} />{/if}
+				</span>
+				<span class="info-value">{item.value}</span>
 			</div>
 		{/each}
 	</div>

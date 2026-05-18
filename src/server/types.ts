@@ -1,4 +1,4 @@
-/** Scope type: user-global or project-specific */
+/** Scope (Claude Code official term): user-global or project-specific. */
 export type ScopeType = "user" | "project";
 
 /** Scope entry returned by /api/scopes */
@@ -14,16 +14,13 @@ export interface Scope {
 export interface ResolvedScope {
   scope: ScopeType;
   claudeDir: string;
-  parentDir: string | null;
+  projectCwd: string | null;
   projectClaudeDir: string | null;
 }
 
-/** Zone identifies where a file lives relative to a scope. */
-export type Zone = "claude" | "parent" | "projectClaude" | "memory";
-
 /** File reference in config (e.g., CLAUDE.md, hooks, rules) */
 export interface FileRef {
-  zone: Zone;
+  scope: ScopeType;
   path: string;
   name?: string;
   size?: number;
@@ -36,6 +33,8 @@ export interface ConfigEntry {
   type: "file" | "dir";
   size?: number;
   children?: ConfigEntry[];
+  /** Which scope contributed this entry. Always set on /api/config responses. */
+  scope: ScopeType;
 }
 
 /** Full config for a scope, returned by /api/config */
@@ -43,9 +42,15 @@ export interface ScopeConfig {
   scope: ScopeType;
   scopeId: string;
   claudeDir: string;
-  parentDir: string | null;
+  projectCwd: string | null;
   projectClaudeDir: string | null;
+  /**
+   * Effective settings. For project scope this is User + Project deep-merged
+   * (project overrides user). For user scope it is the user settings as-is.
+   */
   settings: Record<string, unknown> | null;
+  /** Project scope only: per-top-level-key scope after merge. */
+  settingsProvenance?: Record<string, ScopeType>;
   settingsLocal: Record<string, unknown> | null;
   claudeMd: FileRef | null;
   mcpJson: { content: Record<string, unknown> } | null;
@@ -56,6 +61,7 @@ export interface ScopeConfig {
   agents: ConfigEntry[];
   memory: ConfigEntry[];
   sessionCount: number;
+  /** Project scope only: raw user settings for diffing. */
   userSettings?: Record<string, unknown> | null;
 }
 

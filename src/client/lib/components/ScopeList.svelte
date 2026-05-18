@@ -51,6 +51,9 @@
 	}
 
 	.scope-search {
+		position: sticky;
+		top: 0;
+		z-index: 1;
 		width: 100%;
 		padding: 6px 8px;
 		border: 1px solid var(--border);
