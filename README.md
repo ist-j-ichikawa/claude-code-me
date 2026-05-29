@@ -30,7 +30,7 @@ pnpm install
 pnpm dev          # ブラウザが自動で開きます
 ```
 
-> **前提条件**: Node.js 18+, [Claude Code](https://docs.anthropic.com/en/docs/claude-code) がインストール済みであること（`~/.claude/` が存在すること）
+> **前提条件**: Node.js 22.13+, [Claude Code](https://docs.anthropic.com/en/docs/claude-code) がインストール済みであること（`~/.claude/` が存在すること）
 
 ## Tech Stack
 
@@ -43,7 +43,7 @@ pnpm dev          # ブラウザが自動で開きます
 | Language        | **TypeScript 6**                                                                                      |
 | CSS             | Svelte scoped CSS + CSS custom properties                                                            |
 | Design          | Anthropic-inspired (coral `#D97757`, warm beige `#FAF9F7`, Instrument Sans + Source Code Pro)        |
-| Package Manager | pnpm                                                                                                 |
+| Package Manager | pnpm 11                                                                                              |
 
 ## Development
 
@@ -70,7 +70,7 @@ src/
     sessions.ts       Session parsing (sessions-index.json + JSONL fallback)
     history.ts        Recent prompts from ~/.claude/history.jsonl
     env-vars.ts       Claude Code env var registry (~150 entries)
-    files.ts          File serving + zone resolution + path traversal guard
+    files.ts          File serving + zone resolution + path traversal / symlink guard
     jsonl.ts          JSONL range reader + parser
     types.ts          Shared type definitions
   client/             SvelteKit SPA
@@ -88,3 +88,5 @@ dist/                 Production build output (gitignored)
 
 - **読み取り専用**: 書き込み API なし
 - **localhost のみ**: 外部アクセス不可。許可ディレクトリ外のファイルは読まない
+- **ファイル境界チェック**: path traversal と symlink escape を realpath ベースで拒否
+- **機密値マスク**: `settings.env` / MCP `env` などの API キー・トークン系は値を表示しない

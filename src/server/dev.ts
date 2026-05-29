@@ -9,7 +9,6 @@ import { app, HOSTNAME, PORT, openBrowser } from "./index";
 const httpServer = http.createServer();
 const vite = await createViteServer({
   server: { middlewareMode: true, hmr: { server: httpServer } },
-  appType: "spa",
 });
 
 const honoListener = getRequestListener(app.fetch);
