@@ -13,6 +13,7 @@ build/
 .vite/
 
 # Project-specific Claude Code config
+AGENTS.md
 CLAUDE.md
 .claude.local.md
 .claude/

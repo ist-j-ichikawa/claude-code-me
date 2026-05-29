@@ -17,7 +17,7 @@
 
 	onMount(async () => {
 		try {
-			content = await fetchFile(scopeId, claudeMd.scope, claudeMd.path);
+			content = await fetchFile(scopeId, claudeMd.zone ?? claudeMd.scope, claudeMd.path);
 		} catch (e) {
 			error = e instanceof Error ? e.message : String(e);
 		}

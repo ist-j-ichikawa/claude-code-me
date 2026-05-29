@@ -211,3 +211,13 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   // --- MCP ---
   { name: "ENABLE_TOOL_SEARCH", description: "MCP ツール検索有効化" },
 ];
+
+const SENSITIVE_ENV_NAME_PATTERN =
+  /(^|_)(API_?KEY|TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIALS?|PRIVATE_?KEY|CLIENT_?KEY|CERT|COOKIE|AUTHORIZATION)($|_)/i;
+
+export function isSensitiveEnvVarName(name: string): boolean {
+  return (
+    CLAUDE_CODE_ENV_VARS.some((def) => def.name === name && def.sensitive) ||
+    SENSITIVE_ENV_NAME_PATTERN.test(name)
+  );
+}

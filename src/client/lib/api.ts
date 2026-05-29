@@ -1,7 +1,13 @@
 import { hc } from "hono/client";
 import type { ApiType } from "../../server/routes";
+import type { FileZone } from "./types";
 
 const client = hc<ApiType>("/api");
+const FILE_ZONES = new Set<FileZone>(["user", "project", "parent", "projectClaude", "memory"]);
+
+function assertFileZone(scope: string): asserts scope is FileZone {
+  if (!FILE_ZONES.has(scope as FileZone)) throw new Error(`Invalid file scope: ${scope}`);
+}
 
 export async function fetchScopes() {
   const res = await client.scopes.$get();
@@ -41,6 +47,7 @@ export async function fetchVersion() {
 }
 
 export async function fetchFile(scopeId: string, scope: string, path: string) {
+  assertFileZone(scope);
   const res = await client.file.$get({ query: { scopeId, scope, path } });
   if (!res.ok) throw new Error(`/api/file failed: ${res.status}`);
   return res.text();

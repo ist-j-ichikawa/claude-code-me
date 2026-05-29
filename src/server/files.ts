@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { ResolvedScope, ScopeType } from "./types";
+import type { FileZone, ResolvedScope, ScopeType } from "./types";
 
 /** Tree node for directory listing. */
 export interface TreeNode {
@@ -70,6 +70,32 @@ export function readJsonFile(filePath: string): Record<string, unknown> | null {
   }
 }
 
+function isTraversal(normalized: string): boolean {
+  return normalized === ".." || normalized.startsWith(`..${path.sep}`) || path.isAbsolute(normalized);
+}
+
+function isWithinDir(base: string, target: string): boolean {
+  const rel = path.relative(base, target);
+  return rel === "" || (rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel));
+}
+
+function isMemoryPath(normalized: string): boolean {
+  return normalized === "memory" || normalized.startsWith(`memory${path.sep}`);
+}
+
+/**
+ * Resolve an existing file path and ensure symlinks cannot escape baseDir.
+ * Throws if the target does not exist; returns null when it resolves outside baseDir.
+ */
+export function resolveSafeFilePath(baseDir: string, filePath: string): string | null {
+  const normalized = path.normalize(filePath);
+  if (isTraversal(normalized)) return null;
+
+  const baseReal = fs.realpathSync(baseDir);
+  const fullReal = fs.realpathSync(path.resolve(path.join(baseDir, normalized)));
+  return isWithinDir(baseReal, fullReal) ? fullReal : null;
+}
+
 /**
  * Resolve a scope + filePath to a base directory.
  * - scope=user: file lives under `~/.claude/`.
@@ -80,19 +106,26 @@ export function readJsonFile(filePath: string): Record<string, unknown> | null {
  */
 export function resolveScopeDir(
   resolved: Pick<ResolvedScope, "claudeDir" | "projectCwd" | "projectClaudeDir">,
-  scope: ScopeType | string,
+  scope: FileZone | string,
   filePath: string,
 ): string | null {
   const normalized = path.normalize(filePath);
-  if (normalized.startsWith("..") || path.isAbsolute(normalized)) return null;
+  if (isTraversal(normalized)) return null;
 
   if (scope === "user") return resolved.claudeDir;
+  if (scope === "parent") {
+    return PROJECT_ROOT_ALLOWLIST.has(normalized) && resolved.projectCwd ? resolved.projectCwd : null;
+  }
+  if (scope === "projectClaude") return resolved.projectClaudeDir;
+  if (scope === "memory") {
+    return isMemoryPath(normalized) ? resolved.claudeDir : path.join(resolved.claudeDir, "memory");
+  }
 
   if (scope === "project") {
     if (PROJECT_ROOT_ALLOWLIST.has(normalized) && resolved.projectCwd) {
       return resolved.projectCwd;
     }
-    if (normalized === "memory" || normalized.startsWith("memory/")) {
+    if (isMemoryPath(normalized)) {
       return resolved.claudeDir;
     }
     if (resolved.projectClaudeDir) return resolved.projectClaudeDir;

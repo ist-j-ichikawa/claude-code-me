@@ -22,7 +22,7 @@ describe("detectClaudeMd", () => {
     touch(claudeDir, "CLAUDE.md");
 
     const result = detectClaudeMd("user", claudeDir, null, null);
-    expect(result).toEqual({ scope: "user", path: "CLAUDE.md" });
+    expect(result).toMatchObject({ scope: "user", path: "CLAUDE.md", zone: "user" });
   });
 
   it("user scope: CLAUDE.md がなければ null を返す", () => {
@@ -40,7 +40,7 @@ describe("detectClaudeMd", () => {
     touch(projectCwd, "CLAUDE.md");
 
     const result = detectClaudeMd("project", claudeDir, projectCwd, projectClaudeDir);
-    expect(result!.scope).toBe("project");
+    expect(result).toMatchObject({ scope: "project", path: "CLAUDE.md", zone: "projectClaude" });
   });
 
   it("project scope: projectClaudeDir になければ projectCwd を検索する", () => {
@@ -51,7 +51,7 @@ describe("detectClaudeMd", () => {
     touch(projectCwd, "CLAUDE.md");
 
     const result = detectClaudeMd("project", claudeDir, projectCwd, projectClaudeDir);
-    expect(result!.scope).toBe("project");
+    expect(result).toMatchObject({ scope: "project", path: "CLAUDE.md", zone: "parent" });
   });
 
   it("project scope: projectCwd にもなければ user (claudeDir) にフォールバックする", () => {
@@ -61,7 +61,7 @@ describe("detectClaudeMd", () => {
     touch(claudeDir, "CLAUDE.md");
 
     const result = detectClaudeMd("project", claudeDir, projectCwd, null);
-    expect(result!.scope).toBe("user");
+    expect(result).toMatchObject({ scope: "user", path: "CLAUDE.md", zone: "user" });
   });
 
   it("project scope: どこにもなければ null を返す", () => {
@@ -150,5 +150,49 @@ describe("buildConfig (project scope inheritance)", () => {
     fs.writeFileSync(path.join(homeClaudeDir, "settings.json"), JSON.stringify({ model: "opus" }));
     const cfg = buildConfig("user", homeClaudeDir);
     expect(cfg!.settingsProvenance).toBeUndefined();
+  });
+
+  it("settings.env の機密値をマスクする", () => {
+    const { homeClaudeDir } = setup();
+    fs.writeFileSync(
+      path.join(homeClaudeDir, "settings.json"),
+      JSON.stringify({
+        env: {
+          ANTHROPIC_API_KEY: "secret-api-key",
+          ANTHROPIC_BASE_URL: "https://api.example.test",
+        },
+      }),
+    );
+
+    const cfg = buildConfig("user", homeClaudeDir);
+    expect((cfg!.settings!.env as Record<string, string>).ANTHROPIC_API_KEY).toBe("<set>");
+    expect((cfg!.settings!.env as Record<string, string>).ANTHROPIC_BASE_URL).toBe(
+      "https://api.example.test",
+    );
+  });
+
+  it("MCP server env の機密値をマスクする", () => {
+    const { homeClaudeDir, projectId, projectCwd } = setup();
+    fs.writeFileSync(
+      path.join(projectCwd, ".mcp.json"),
+      JSON.stringify({
+        mcpServers: {
+          local: {
+            command: "node",
+            env: {
+              CUSTOM_TOKEN: "secret-token",
+              PUBLIC_FLAG: "visible",
+            },
+          },
+        },
+      }),
+    );
+
+    const cfg = buildConfig(projectId, homeClaudeDir);
+    const mcp = cfg!.mcpJson!.content as {
+      mcpServers: Record<string, { env: Record<string, string> }>;
+    };
+    expect(mcp.mcpServers.local.env.CUSTOM_TOKEN).toBe("<set>");
+    expect(mcp.mcpServers.local.env.PUBLIC_FLAG).toBe("visible");
   });
 });

@@ -1,13 +1,47 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import type { ScopeType, FileRef, ScopeConfig } from "./types";
+import type { FileZone, ScopeType, FileRef, ScopeConfig } from "./types";
 import { readJsonFile, readDirRecursive, listJsonlFiles } from "./files";
 import { resolveScope } from "./scopes";
 import { mergeTrees, mergeSettings, tagTree } from "./merge";
+import { isSensitiveEnvVarName } from "./env-vars";
 
 export const HOME_CLAUDE_DIR = path.join(os.homedir(), ".claude");
 const DOT_CLAUDE_JSON = path.join(os.homedir(), ".claude.json");
+
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
+function maskEnvRecord(env: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(env)) {
+    out[key] = isSensitiveEnvVarName(key) && value != null ? "<set>" : value;
+  }
+  return out;
+}
+
+function maskSecrets(value: unknown, parentKey = ""): unknown {
+  if (Array.isArray(value)) return value.map((item) => maskSecrets(item, parentKey));
+  if (!isPlainObject(value)) return value;
+
+  if (parentKey === "env") return maskEnvRecord(value);
+
+  const out: Record<string, unknown> = {};
+  for (const [key, child] of Object.entries(value)) {
+    if (isSensitiveEnvVarName(key) && !isPlainObject(child) && !Array.isArray(child) && child != null) {
+      out[key] = "<set>";
+      continue;
+    }
+    out[key] = maskSecrets(child, key);
+  }
+  return out;
+}
+
+export function maskConfigSecrets<T extends Record<string, unknown> | null>(value: T): T {
+  return (value ? maskSecrets(value) : value) as T;
+}
 
 /**
  * Detect CLAUDE.md in the appropriate location.
@@ -19,17 +53,19 @@ export function detectClaudeMd(
   projectCwd: string | null,
   projectClaudeDir: string | null,
 ): FileRef | null {
-  const candidates: Array<{ dir: string; scope: ScopeType }> = [];
+  const candidates: Array<{ dir: string; scope: ScopeType; zone: FileZone }> = [];
 
   if (scope === "project") {
-    if (projectClaudeDir) candidates.push({ dir: projectClaudeDir, scope: "project" });
-    if (projectCwd) candidates.push({ dir: projectCwd, scope: "project" });
+    if (projectClaudeDir) {
+      candidates.push({ dir: projectClaudeDir, scope: "project", zone: "projectClaude" });
+    }
+    if (projectCwd) candidates.push({ dir: projectCwd, scope: "project", zone: "parent" });
   }
-  candidates.push({ dir: claudeDir, scope: "user" });
+  candidates.push({ dir: claudeDir, scope: "user", zone: "user" });
 
-  for (const { dir, scope: s } of candidates) {
+  for (const { dir, scope: s, zone } of candidates) {
     if (fs.existsSync(path.join(dir, "CLAUDE.md"))) {
-      return { scope: s, path: "CLAUDE.md" };
+      return { scope: s, zone, path: "CLAUDE.md" };
     }
   }
   return null;
@@ -46,12 +82,12 @@ export function detectMcpJson(
 ): { content: Record<string, unknown> } | null {
   if (scope === "project" && projectCwd) {
     const content = readJsonFile(path.join(projectCwd, ".mcp.json"));
-    return content ? { content } : null;
+    return content ? { content: maskConfigSecrets(content) } : null;
   }
   const dotClaude = readJsonFile(DOT_CLAUDE_JSON);
   const servers = dotClaude?.mcpServers as Record<string, unknown> | undefined;
   if (servers && Object.keys(servers).length > 0) {
-    return { content: { mcpServers: servers } };
+    return { content: { mcpServers: maskSecrets(servers) as Record<string, unknown> } };
   }
   return null;
 }
@@ -71,10 +107,12 @@ export function buildConfig(scopeId: string, homeClaudeDir = HOME_CLAUDE_DIR): S
       ? projectClaudeDir
       : claudeDir;
 
-  const userSettings = readJsonFile(path.join(homeClaudeDir, "settings.json"));
+  const userSettings = maskConfigSecrets(readJsonFile(path.join(homeClaudeDir, "settings.json")));
   const projectSettings =
-    scope === "project" ? readJsonFile(path.join(contentDir, "settings.json")) : null;
-  const settingsLocal = readJsonFile(path.join(contentDir, "settings.local.json"));
+    scope === "project"
+      ? maskConfigSecrets(readJsonFile(path.join(contentDir, "settings.json")))
+      : null;
+  const settingsLocal = maskConfigSecrets(readJsonFile(path.join(contentDir, "settings.local.json")));
 
   const sessionCount = listJsonlFiles(claudeDir).length;
 

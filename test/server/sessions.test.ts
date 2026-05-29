@@ -67,10 +67,9 @@ describe("getSessions", () => {
     );
 
     const sessions = getSessions(dir);
-    // side-001 はインデックスから除外されるが、JSONL fallback で拾われる
-    // ただしインデックスにある main-001 はインデックス経由
     const main = sessions.find((s) => s.sessionId === "main-001");
     expect(main).toBeDefined();
+    expect(sessions.find((s) => s.sessionId === "side-001")).toBeUndefined();
   });
 
   it("JSONL がない場合は空配列を返すこと", () => {

@@ -24,9 +24,14 @@ export function getSessions(dir: string): Session[] {
   // Build lookup from sessions-index.json (has customTitle, summary)
   const index = readJsonFile(path.join(dir, "sessions-index.json"));
   const indexMap = new Map<string, IndexEntry>();
+  const sidechainIds = new Set<string>();
   if (index?.entries && Array.isArray(index.entries)) {
     for (const e of index.entries as IndexEntry[]) {
-      if (!e.isSidechain) indexMap.set(e.sessionId, e);
+      if (e.isSidechain) {
+        sidechainIds.add(e.sessionId);
+      } else {
+        indexMap.set(e.sessionId, e);
+      }
     }
   }
 
@@ -37,6 +42,7 @@ export function getSessions(dir: string): Session[] {
   for (const filename of jsonlFiles) {
     const filePath = path.join(dir, filename);
     const sessionId = filename.endsWith(".jsonl") ? filename.slice(0, -6) : filename;
+    if (sidechainIds.has(sessionId)) continue;
 
     // Use index entry if available (faster, has rich metadata)
     const ie = indexMap.get(sessionId);

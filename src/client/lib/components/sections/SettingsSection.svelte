@@ -123,6 +123,33 @@
 	let autoMode = $derived(s.autoMode as Record<string, unknown> | undefined);
 	let worktree = $derived(s.worktree as Record<string, unknown> | undefined);
 	let sandbox = $derived(s.sandbox as Record<string, unknown> | undefined);
+	let attributionItems: InfoItem[] = $derived.by(() => {
+		if (!attribution) return [];
+		const attrScope = scopeOf('attribution');
+		const items: InfoItem[] = [];
+		if (attribution.commit !== undefined) {
+			items.push({
+				label: 'Commit Message',
+				value: String(attribution.commit || '(empty)'),
+				scope: attrScope,
+			});
+		}
+		if (attribution.pr !== undefined) {
+			items.push({
+				label: 'PR Message',
+				value: String(attribution.pr || '(empty)'),
+				scope: attrScope,
+			});
+		}
+		if (attribution.prUrlTemplate !== undefined) {
+			items.push({
+				label: 'PR URL Template',
+				value: String(attribution.prUrlTemplate),
+				scope: attrScope,
+			});
+		}
+		return items;
+	});
 
 	// Fields not covered by GROUPS or HANDLED_ELSEWHERE — surfaced as Other
 	let knownKeys = $derived(
@@ -185,12 +212,7 @@
 
 	{#if attribution}
 		<h4>Attribution {#if scopeOf('attribution')}<ScopeBadge scope={scopeOf('attribution')} />{/if}</h4>
-		{@const attrScope = scopeOf('attribution')}
-		<InfoGrid items={[
-			attribution.commit !== undefined ? { label: 'Commit Message', value: String(attribution.commit || '(empty)'), scope: attrScope } : null,
-			attribution.pr !== undefined ? { label: 'PR Message', value: String(attribution.pr || '(empty)'), scope: attrScope } : null,
-			attribution.prUrlTemplate !== undefined ? { label: 'PR URL Template', value: String(attribution.prUrlTemplate), scope: attrScope } : null,
-		].filter((x): x is InfoItem => x !== null)} />
+		<InfoGrid items={attributionItems} />
 	{/if}
 
 	{#if statusLine}

@@ -7,6 +7,7 @@ import {
   readDirRecursive,
   readJsonFile,
   resolveScopeDir,
+  resolveSafeFilePath,
   PROJECT_ROOT_ALLOWLIST,
 } from "../../src/server/files";
 
@@ -169,5 +170,30 @@ describe("resolveScopeDir", () => {
 
   it("絶対パスは null を返すこと", () => {
     expect(resolveScopeDir(resolved, "user", "/etc/passwd")).toBeNull();
+  });
+});
+
+// --- resolveSafeFilePath ---
+
+describe("resolveSafeFilePath", () => {
+  const tmp = useTmpDir();
+
+  it("baseDir 配下の通常ファイルは realpath を返すこと", () => {
+    const base = path.join(tmp.get(), "base");
+    fs.mkdirSync(base, { recursive: true });
+    const file = path.join(base, "ok.md");
+    fs.writeFileSync(file, "ok");
+
+    expect(resolveSafeFilePath(base, "ok.md")).toBe(fs.realpathSync(file));
+  });
+
+  it("baseDir 外を指す symlink は拒否すること", () => {
+    const base = path.join(tmp.get(), "base");
+    fs.mkdirSync(base, { recursive: true });
+    const outside = path.join(tmp.get(), "outside-secret.txt");
+    fs.writeFileSync(outside, "secret");
+    fs.symlinkSync(outside, path.join(base, "leak.md"));
+
+    expect(resolveSafeFilePath(base, "leak.md")).toBeNull();
   });
 });

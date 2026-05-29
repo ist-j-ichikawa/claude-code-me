@@ -1,6 +1,9 @@
 /** Scope (Claude Code official term): user-global or project-specific. */
 export type ScopeType = "user" | "project";
 
+/** File serving zone. `project` is retained as the legacy project .claude zone. */
+export type FileZone = ScopeType | "parent" | "projectClaude" | "memory";
+
 /** Scope entry from /api/scopes */
 export interface ScopeEntry {
   id: string;
@@ -15,6 +18,7 @@ export interface ScopeEntry {
 /** File reference */
 export interface FileRef {
   scope: ScopeType;
+  zone?: FileZone;
   path: string;
   name?: string;
   size?: number;
