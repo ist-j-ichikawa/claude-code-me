@@ -46,7 +46,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME", description: "Haiku モデル表示名" },
   { name: "ANTHROPIC_DEFAULT_HAIKU_MODEL_DESCRIPTION", description: "Haiku モデル説明" },
   { name: "ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES", description: "Haiku 対応機能" },
-  { name: "CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE", description: "Fast mode を Opus 4.6 にピン留め (2.1.142+、default は Opus 4.7)" },
+  { name: "CLAUDE_CODE_OPUS_4_6_FAST_MODE_OVERRIDE", description: "Fast mode を Opus 4.6 にピン留め (2.1.160 で削除、現在は no-op)" },
   { name: "ANTHROPIC_DEFAULT_OPUS_MODEL", description: "デフォルト Opus モデル ID" },
   { name: "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME", description: "Opus モデル表示名" },
   { name: "ANTHROPIC_DEFAULT_OPUS_MODEL_DESCRIPTION", description: "Opus モデル説明" },
@@ -107,6 +107,8 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "DISABLE_AUTOUPDATER", description: "自動更新機能無効化" },
   { name: "DISABLE_UPDATES", description: "全ての update path をブロック (manual `claude update` 含む、2.1.135+)" },
   { name: "OTEL_LOG_RAW_API_BODIES", description: "API リクエスト/レスポンスボディを OTel ログとして出力" },
+  { name: "OTEL_LOG_TOOL_DETAILS", description: "tool_decision テレメトリに tool_parameters (bash コマンド、MCP/skill 名) を含める (2.1.157+)" },
+  { name: "OTEL_METRICS_INCLUDE_ENTRYPOINT", description: "session entrypoint を OTel メトリクス属性 (app.entrypoint) に追加 (2.1.152+)" },
 
   // --- Features / behaviors (disable) ---
   { name: "CLAUDE_CODE_DISABLE_1M_CONTEXT", description: "1M コンテキスト無効化" },
@@ -133,6 +135,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY", description: "ゲートウェイモデル検出" },
   { name: "CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION", description: "プロンプト提案" },
   { name: "CLAUDE_CODE_ENABLE_TASKS", description: "タスク追跡システム有効化" },
+  { name: "CLAUDE_CODE_ENABLE_AUTO_MODE", description: "Bedrock/Vertex/Foundry で auto mode 有効化 (Opus 4.7/4.8、2.1.158+)" },
   { name: "CLAUDE_CODE_ATTRIBUTION_HEADER", description: "システムプロンプト属性ブロック表示" },
   { name: "CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD", description: "追加ディレクトリから CLAUDE.md 読み込み" },
   { name: "CLAUDE_CODE_AUTO_CONNECT_IDE", description: "IDE 自動接続" },
@@ -155,6 +158,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
 
   // --- Effort / context ---
   { name: "CLAUDE_CODE_EFFORT_LEVEL", description: "努力レベル (low/medium/high/xhigh/max/auto)" },
+  { name: "CLAUDE_CODE_ALWAYS_ENABLE_EFFORT", description: "明示設定がなくても effort パラメータを常に送信" },
   { name: "CLAUDE_CODE_EXTRA_BODY", description: "API リクエストボディ追加 JSON" },
 
   // --- Auth bypass / skip ---
@@ -204,6 +208,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST", description: "ホスト管理プロバイダルーティング" },
   { name: "CLAUDE_CODE_REMOTE", description: "クラウドセッション自動設定フラグ" },
   { name: "CLAUDE_CODE_REMOTE_SESSION_ID", description: "リモートセッション ID" },
+  { name: "CLAUDE_JOB_DIR", description: "バックグラウンドセッションの一時ファイルディレクトリ" },
   { name: "CLAUDE_CODE_SESSION_ID", description: "セッション ID (プロセス用)" },
   { name: "CLAUDECODE", description: "Claude Code 内シェル環境判定フラグ" },
   { name: "CCR_FORCE_BUNDLE", description: "リモートモード時に強制バンドル" },

@@ -1,4 +1,7 @@
-/** Hook event reference data (15 events). */
+/** ツール名にマッチする hook の matcher 候補（PreToolUse / PostToolUse / PostToolUseFailure / PermissionRequest 共通）。 */
+const TOOL_MATCHERS = ["Bash", "Write", "Edit", "Read", "Glob", "Grep", "WebFetch", "Task", "mcp__*"];
+
+/** Hook event reference data. */
 export const HOOK_EVENTS: Record<
   string,
   { desc: string; timing: string; canBlock: boolean; matchers: string[] }
@@ -25,23 +28,41 @@ export const HOOK_EVENTS: Record<
     desc: "ツール実行前に発火します。ツールの実行をブロックしたり入力を変更できます。",
     timing: "ツール実行前",
     canBlock: true,
-    matchers: ["Bash", "Write", "Edit", "Read", "Glob", "Grep", "WebFetch", "Task", "mcp__*"],
+    matchers: TOOL_MATCHERS,
   },
   PostToolUse: {
     desc: "ツール実行成功後に発火します。",
     timing: "ツール成功後",
     canBlock: false,
-    matchers: ["Bash", "Write", "Edit", "Read", "Glob", "Grep", "WebFetch", "Task", "mcp__*"],
+    matchers: TOOL_MATCHERS,
   },
   PostToolUseFailure: {
     desc: "ツール実行失敗後に発火します。",
     timing: "ツール失敗後",
     canBlock: false,
-    matchers: ["Bash", "Write", "Edit", "Read", "Glob", "Grep", "WebFetch", "Task", "mcp__*"],
+    matchers: TOOL_MATCHERS,
+  },
+  PostToolBatch: {
+    desc: "並列ツール呼び出しのバッチが完了し、次のモデル呼び出しに入る前に発火します。",
+    timing: "ツールバッチ完了後",
+    canBlock: true,
+    matchers: [],
+  },
+  PermissionRequest: {
+    desc: "パーミッションダイアログが表示される時に発火します。ユーザーに代わって自動承認 / 拒否が可能。",
+    timing: "パーミッション要求時",
+    canBlock: true,
+    matchers: TOOL_MATCHERS,
   },
   UserPromptSubmit: {
     desc: "ユーザーがプロンプトを送信した時に発火します。",
     timing: "プロンプト送信時",
+    canBlock: true,
+    matchers: [],
+  },
+  UserPromptExpansion: {
+    desc: "スラッシュコマンド / MCP プロンプトがプロンプトに展開される直前に発火します。特定コマンドのブロックや context 注入が可能。matcher は command_name にマッチ。",
+    timing: "コマンド展開時",
     canBlock: true,
     matchers: [],
   },
@@ -68,6 +89,12 @@ export const HOOK_EVENTS: Record<
     timing: "通知表示時",
     canBlock: false,
     matchers: ["permission_prompt", "idle_prompt", "auth_success"],
+  },
+  MessageDisplay: {
+    desc: "アシスタントのメッセージ表示時に発火します。`hookSpecificOutput.displayContent` で画面表示テキストを差し替え可能。",
+    timing: "メッセージ表示時",
+    canBlock: false,
+    matchers: [],
   },
   PreCompact: {
     desc: "コンテキスト圧縮前に発火します。",
@@ -150,6 +177,12 @@ export const HOOK_EVENTS: Record<
   CwdChanged: {
     desc: "作業ディレクトリが変更された時に発火します。",
     timing: "ディレクトリ変更時",
+    canBlock: false,
+    matchers: [],
+  },
+  FileChanged: {
+    desc: "監視対象ファイルがディスク上で変更された時に発火します（direnv 等の環境再読込やリビルドに有用）。matcher は正規表現ではなくファイル名リテラル（`|` 区切り）。`CLAUDE_ENV_FILE` 対応。",
+    timing: "ファイル変更時",
     canBlock: false,
     matchers: [],
   },
