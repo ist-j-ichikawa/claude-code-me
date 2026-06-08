@@ -109,6 +109,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "OTEL_LOG_RAW_API_BODIES", description: "API リクエスト/レスポンスボディを OTel ログとして出力" },
   { name: "OTEL_LOG_TOOL_DETAILS", description: "tool_decision テレメトリに tool_parameters (bash コマンド、MCP/skill 名) を含める (2.1.157+)" },
   { name: "OTEL_METRICS_INCLUDE_ENTRYPOINT", description: "session entrypoint を OTel メトリクス属性 (app.entrypoint) に追加 (2.1.152+)" },
+  { name: "OTEL_RESOURCE_ATTRIBUTES", description: "OTel リソース属性をメトリクスのラベルに付与 (team/repo 等でスライス、ラベル付与は 2.1.161+)" },
 
   // --- Features / behaviors (disable) ---
   { name: "CLAUDE_CODE_DISABLE_1M_CONTEXT", description: "1M コンテキスト無効化" },
@@ -209,12 +210,14 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_REMOTE", description: "クラウドセッション自動設定フラグ" },
   { name: "CLAUDE_CODE_REMOTE_SESSION_ID", description: "リモートセッション ID" },
   { name: "CLAUDE_JOB_DIR", description: "バックグラウンドセッションの一時ファイルディレクトリ" },
+  { name: "CLAUDE_CODE_TMPDIR", description: "Claude Code 専用一時ディレクトリ ($TMPDIR override、Unix socket / session-env 等に使用)" },
   { name: "CLAUDE_CODE_SESSION_ID", description: "セッション ID (プロセス用)" },
   { name: "CLAUDECODE", description: "Claude Code 内シェル環境判定フラグ" },
   { name: "CCR_FORCE_BUNDLE", description: "リモートモード時に強制バンドル" },
 
   // --- MCP ---
   { name: "ENABLE_TOOL_SEARCH", description: "MCP ツール検索有効化" },
+  { name: "MCP_TOOL_TIMEOUT", description: "MCP ツール呼び出しのタイムアウト (ms、per-server timeout 未設定時のフォールバック)" },
 ];
 
 const SENSITIVE_ENV_NAME_PATTERN =
