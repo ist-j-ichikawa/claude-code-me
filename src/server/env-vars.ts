@@ -35,6 +35,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "ANTHROPIC_FOUNDRY_RESOURCE", description: "Foundry リソース名" },
   { name: "ANTHROPIC_VERTEX_PROJECT_ID", description: "GCP プロジェクト ID" },
   { name: "ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION", description: "Haiku モデル AWS リージョン" },
+  { name: "AWS_REGION", description: "Bedrock リージョン (未設定時の ~/.aws config 参照は 2.1.172+)" },
   { name: "ANTHROPIC_WORKSPACE_ID", description: "workload identity federation 用 workspace スコープ (2.1.141+)" },
   { name: "GCLOUD_PROJECT", description: "GCP プロジェクト ID (Vertex)" },
   { name: "GOOGLE_CLOUD_PROJECT", description: "GCP プロジェクト ID (Vertex 代替)" },
@@ -84,6 +85,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS", description: "SessionEnd フック時間予算 (default 1500)" },
   { name: "CLAUDE_CODE_STOP_HOOK_BLOCK_CAP", description: "Stop フックの連続ブロック上限 (default 8、2.1.143+)" },
   { name: "MAX_THINKING_TOKENS", description: "拡張思考最大トークン数" },
+  { name: "API_FORCE_IDLE_TIMEOUT", description: "ストリーミング応答の 5分アイドルタイムアウト上書き (=0 で無効化、2.1.169+)" },
 
   // --- Display / UI / accessibility ---
   { name: "CLAUDE_CODE_ACCESSIBILITY", description: "アクセシビリティモード (カーソル表示)" },
@@ -128,6 +130,8 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL", description: "公式マーケットプレイス自動インストール無効化" },
   { name: "CLAUDE_CODE_DISABLE_POLICY_SKILLS", description: "ポリシースキル読み込み無効化" },
   { name: "CLAUDE_CODE_DISABLE_THINKING", description: "拡張思考無効化" },
+  { name: "CLAUDE_CODE_DISABLE_BUNDLED_SKILLS", description: "バンドル skill / workflow / built-in slash command をモデルから隠す (2.1.169+)" },
+  { name: "CLAUDE_CODE_SAFE_MODE", description: "全カスタマイズ (CLAUDE.md / plugins / skills / hooks / MCP) を無効化して起動 (--safe-mode 相当、トラブルシュート用、2.1.169+)" },
 
   // --- Features / behaviors (enable) ---
   { name: "CLAUDE_CODE_ENABLE_AWAY_SUMMARY", description: "セッション要約有効化" },
@@ -139,6 +143,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_ENABLE_AUTO_MODE", description: "Bedrock/Vertex/Foundry で auto mode 有効化 (Opus 4.7/4.8、2.1.158+)" },
   { name: "CLAUDE_CODE_ATTRIBUTION_HEADER", description: "システムプロンプト属性ブロック表示" },
   { name: "CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD", description: "追加ディレクトリから CLAUDE.md 読み込み" },
+  { name: "CLAUDE_MEMORY_STORES", description: "マウントするチームメモリストア (remote セッション対応は 2.1.172+)" },
   { name: "CLAUDE_CODE_AUTO_CONNECT_IDE", description: "IDE 自動接続" },
   { name: "CLAUDE_AUTO_BACKGROUND_TASKS", description: "長時間実行タスク自動バックグラウンド化" },
   { name: "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR", description: "Bash コマンド後に作業ディレクトリ復帰" },
