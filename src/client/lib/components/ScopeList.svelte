@@ -44,7 +44,7 @@
 
 <style>
 	.scope-list {
-		padding: 0 8px;
+		padding: 0 8px 8px;
 		flex: 1 1 auto;
 		min-height: 0;
 		overflow-y: auto;

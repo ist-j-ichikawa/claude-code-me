@@ -41,7 +41,7 @@
 	.sidebar {
 		background: var(--bg-card);
 		border-right: 1px solid var(--border);
-		padding: 16px 0;
+		padding: 16px 0 0;
 		position: sticky;
 		top: 0;
 		height: 100vh;
@@ -88,6 +88,7 @@
 	.sidebar-section-flex {
 		flex: 1 1 auto;
 		min-height: 0;
+		padding-bottom: 0;
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
