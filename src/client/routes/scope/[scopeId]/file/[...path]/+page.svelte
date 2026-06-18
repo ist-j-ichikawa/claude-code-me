@@ -1,7 +1,11 @@
 <script lang="ts">
+	import { renderMarkdown } from '$lib/markdown';
+
 	let { data } = $props();
 	let isJson = $derived(data.filePath.endsWith('.json'));
+	let isMarkdown = $derived(/\.(md|markdown)$/i.test(data.filePath));
 	let formatted = $derived(isJson ? tryFormatJson(data.content) : data.content);
+	let rendered = $derived(isMarkdown ? renderMarkdown(data.content) : '');
 
 	function tryFormatJson(text: string): string {
 		try { return JSON.stringify(JSON.parse(text), null, 2); }
@@ -17,7 +21,11 @@
 		<div class="error">{data.content}</div>
 	{:else}
 		<div class="card">
-			<pre class="file-content">{formatted}</pre>
+			{#if isMarkdown}
+				<div class="markdown-body">{@html rendered}</div>
+			{:else}
+				<pre class="file-content">{formatted}</pre>
+			{/if}
 		</div>
 	{/if}
 </div>

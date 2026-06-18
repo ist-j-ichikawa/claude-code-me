@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fetchFile } from '$lib/api';
+	import { renderMarkdown } from '$lib/markdown';
 	import Section from '../Section.svelte';
 	import type { FileRef } from '$lib/types';
 
@@ -14,6 +15,7 @@
 
 	let content = $state<string | null>(null);
 	let error = $state<string | null>(null);
+	let rendered = $derived(content === null ? '' : renderMarkdown(content));
 
 	onMount(async () => {
 		try {
@@ -27,7 +29,9 @@
 <Section title="CLAUDE.md" id="claude-md">
 	<p class="path">{claudeMd.path}</p>
 	{#if content !== null}
-		<pre class="md-content">{content}</pre>
+		<div class="md-scroll">
+			<div class="markdown-body">{@html rendered}</div>
+		</div>
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else}
@@ -42,13 +46,7 @@
 		color: var(--text-tertiary);
 		margin-bottom: 8px;
 	}
-	.md-content {
-		font-family: var(--font-code);
-		font-size: 13px;
-		color: var(--text-secondary);
-		white-space: pre-wrap;
-		word-break: break-word;
-		margin: 0;
+	.md-scroll {
 		max-height: 320px;
 		overflow-y: auto;
 	}

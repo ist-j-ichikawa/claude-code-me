@@ -1,5 +1,6 @@
 <script>
 	import '../lib/tokens.css';
+	import '../lib/markdown.css';
 
 	let { children } = $props();
 </script>
