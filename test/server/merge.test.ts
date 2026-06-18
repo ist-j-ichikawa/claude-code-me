@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mergeTrees, mergeSettings } from "../../src/server/merge";
+import { mergeTrees } from "../../src/server/merge";
 import type { TreeNode } from "../../src/server/files";
 
 describe("mergeTrees", () => {
@@ -64,56 +64,5 @@ describe("mergeTrees", () => {
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe("dir");
     expect(result[0].scope).toBe("project");
-  });
-});
-
-describe("mergeSettings", () => {
-  it("user 単独の key は scope=user", () => {
-    const result = mergeSettings({ model: "opus" }, null);
-    expect(result.effective).toEqual({ model: "opus" });
-    expect(result.provenance).toEqual({ model: "user" });
-  });
-
-  it("project 単独の key は scope=project", () => {
-    const result = mergeSettings(null, { model: "sonnet" });
-    expect(result.effective).toEqual({ model: "sonnet" });
-    expect(result.provenance).toEqual({ model: "project" });
-  });
-
-  it("両方にある top-level スカラーは project が勝つ", () => {
-    const result = mergeSettings({ model: "opus" }, { model: "sonnet" });
-    expect(result.effective.model).toBe("sonnet");
-    expect(result.provenance.model).toBe("project");
-  });
-
-  it("ネストした object は deep merge される", () => {
-    const user = { permissions: { defaultMode: "ask", allow: ["a", "b"] } };
-    const project = { permissions: { allow: ["c"] } };
-    const result = mergeSettings(user, project);
-    expect(result.effective.permissions).toEqual({
-      defaultMode: "ask",
-      allow: ["c"],
-    });
-    expect(result.provenance.permissions).toBe("project");
-  });
-
-  it("配列は merge せず project が user を置換する (Claude Code default)", () => {
-    const user = { allow: ["a", "b"] };
-    const project = { allow: ["c"] };
-    const result = mergeSettings(user, project);
-    expect(result.effective.allow).toEqual(["c"]);
-  });
-
-  it("両方 null なら空オブジェクトを返す", () => {
-    const result = mergeSettings(null, null);
-    expect(result.effective).toEqual({});
-    expect(result.provenance).toEqual({});
-  });
-
-  it("user に無く project に存在する key の provenance は project", () => {
-    const user = { model: "opus" };
-    const project = { effortLevel: "high" };
-    const result = mergeSettings(user, project);
-    expect(result.provenance).toEqual({ model: "user", effortLevel: "project" });
   });
 });

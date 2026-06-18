@@ -56,8 +56,6 @@ export interface ScopeConfig {
    * apply at runtime but are not shown here). For user scope, the user settings.
    */
   settings: Record<string, unknown> | null;
-  /** Reserved: per-key provenance (not populated while project shows own settings only). */
-  settingsProvenance?: Record<string, ScopeType>;
   settingsLocal: Record<string, unknown> | null;
   claudeMd: FileRef | null;
   mcpJson: { content: Record<string, unknown> } | null;
@@ -68,8 +66,6 @@ export interface ScopeConfig {
   agents: ConfigEntry[];
   memory: ConfigEntry[];
   sessionCount: number;
-  /** Project scope only: raw user settings for diffing. */
-  userSettings?: Record<string, unknown> | null;
 }
 
 /** Session entry returned by /api/sessions */

@@ -2,15 +2,10 @@
 	import Section from '../Section.svelte';
 	import InfoGrid, { type InfoItem } from '../InfoGrid.svelte';
 	import TagList from '../TagList.svelte';
-	import ScopeBadge from '../ScopeBadge.svelte';
-	import type { ScopeConfig, ScopeType } from '$lib/types';
+	import type { ScopeConfig } from '$lib/types';
 
 	let { config }: { config: ScopeConfig } = $props();
 	let s = $derived((config.settings ?? {}) as Record<string, unknown>);
-	let provenance = $derived(config.settingsProvenance ?? {});
-	function scopeOf(key: string): ScopeType | undefined {
-		return provenance[key];
-	}
 
 	// Fields that have their own dedicated section elsewhere in the hub
 	const HANDLED_ELSEWHERE = new Set([
@@ -114,7 +109,7 @@
 	function groupItems(fields: [string, string][]): InfoItem[] {
 		return fields
 			.filter(([key]) => key in s && s[key] !== null && s[key] !== '')
-			.map(([key, label]) => ({ label, value: fmt(s[key]), scope: scopeOf(key) }));
+			.map(([key, label]) => ({ label, value: fmt(s[key]) }));
 	}
 
 	let perms = $derived(s.permissions as Record<string, unknown> | undefined);
@@ -125,27 +120,23 @@
 	let sandbox = $derived(s.sandbox as Record<string, unknown> | undefined);
 	let attributionItems: InfoItem[] = $derived.by(() => {
 		if (!attribution) return [];
-		const attrScope = scopeOf('attribution');
 		const items: InfoItem[] = [];
 		if (attribution.commit !== undefined) {
 			items.push({
 				label: 'Commit Message',
 				value: String(attribution.commit || '(empty)'),
-				scope: attrScope,
 			});
 		}
 		if (attribution.pr !== undefined) {
 			items.push({
 				label: 'PR Message',
 				value: String(attribution.pr || '(empty)'),
-				scope: attrScope,
 			});
 		}
 		if (attribution.prUrlTemplate !== undefined) {
 			items.push({
 				label: 'PR URL Template',
 				value: String(attribution.prUrlTemplate),
-				scope: attrScope,
 			});
 		}
 		return items;
@@ -177,7 +168,7 @@
 	{/each}
 
 	{#if perms}
-		<h4>Permissions {#if scopeOf('permissions')}<ScopeBadge scope={scopeOf('permissions')} />{/if}</h4>
+		<h4>Permissions</h4>
 		{#if (perms.allow as string[])?.length}
 			<div class="subsection">
 				<div class="subsection-label allow">Allow ({(perms.allow as string[]).length})</div>
@@ -211,33 +202,33 @@
 	{/if}
 
 	{#if attribution}
-		<h4>Attribution {#if scopeOf('attribution')}<ScopeBadge scope={scopeOf('attribution')} />{/if}</h4>
+		<h4>Attribution</h4>
 		<InfoGrid items={attributionItems} />
 	{/if}
 
 	{#if statusLine}
-		<h4>Status Line {#if scopeOf('statusLine')}<ScopeBadge scope={scopeOf('statusLine')} />{/if}</h4>
+		<h4>Status Line</h4>
 		<pre class="json-view">{JSON.stringify(statusLine, null, 2)}</pre>
 	{/if}
 
 	{#if autoMode}
-		<h4>Auto Mode {#if scopeOf('autoMode')}<ScopeBadge scope={scopeOf('autoMode')} />{/if}</h4>
+		<h4>Auto Mode</h4>
 		<pre class="json-view">{JSON.stringify(autoMode, null, 2)}</pre>
 	{/if}
 
 	{#if worktree}
-		<h4>Worktree {#if scopeOf('worktree')}<ScopeBadge scope={scopeOf('worktree')} />{/if}</h4>
+		<h4>Worktree</h4>
 		<pre class="json-view">{JSON.stringify(worktree, null, 2)}</pre>
 	{/if}
 
 	{#if sandbox}
-		<h4>Sandbox {#if scopeOf('sandbox')}<ScopeBadge scope={scopeOf('sandbox')} />{/if}</h4>
+		<h4>Sandbox</h4>
 		<pre class="json-view">{JSON.stringify(sandbox, null, 2)}</pre>
 	{/if}
 
 	{#if otherEntries.length > 0}
 		<h4>Other</h4>
-		<InfoGrid items={otherEntries.map(([k, v]) => ({ label: k, value: fmt(v), scope: scopeOf(k) }))} />
+		<InfoGrid items={otherEntries.map(([k, v]) => ({ label: k, value: fmt(v) }))} />
 	{/if}
 </Section>
 

@@ -50,39 +50,3 @@ export function mergeTrees(user: TreeNode[], project: TreeNode[]): ScopedTreeNod
   return out;
 }
 
-export interface SettingsMerge {
-  effective: Record<string, unknown>;
-  provenance: Record<string, ScopeType>;
-}
-
-function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === "object" && v !== null && !Array.isArray(v);
-}
-
-function deepMerge(base: unknown, overlay: unknown): unknown {
-  if (!isPlainObject(base) || !isPlainObject(overlay)) return overlay;
-  const out: Record<string, unknown> = { ...base };
-  for (const k of Object.keys(overlay)) {
-    out[k] = deepMerge(base[k], overlay[k]);
-  }
-  return out;
-}
-
-/**
- * Deep merge user + project settings, returning effective values + per-top-level-key scope.
- * Project overrides user on key collision. Arrays are replaced, not concatenated.
- * Provenance tracks only top-level keys; nested overrides aren't broken out.
- */
-export function mergeSettings(
-  user: Record<string, unknown> | null,
-  project: Record<string, unknown> | null,
-): SettingsMerge {
-  const u = user ?? {};
-  const p = project ?? {};
-  const effective = deepMerge(u, p) as Record<string, unknown>;
-  const provenance: Record<string, ScopeType> = {};
-  for (const k of Object.keys(effective)) {
-    provenance[k] = k in p ? "project" : "user";
-  }
-  return { effective, provenance };
-}

@@ -139,14 +139,13 @@ describe("buildConfig (project scope inheritance)", () => {
       permissions: { allow: ["Bash"] },
     });
     expect(cfg!.settings).not.toHaveProperty("model");
-    expect(cfg!.settingsProvenance).toBeUndefined();
   });
 
-  it("user scope では settingsProvenance を返さない", () => {
+  it("user scope では user の settings.json をそのまま返す", () => {
     const { homeClaudeDir } = setup();
     fs.writeFileSync(path.join(homeClaudeDir, "settings.json"), JSON.stringify({ model: "opus" }));
     const cfg = buildConfig("user", homeClaudeDir);
-    expect(cfg!.settingsProvenance).toBeUndefined();
+    expect(cfg!.settings).toEqual({ model: "opus" });
   });
 
   it("settings.env の機密値をマスクする", () => {

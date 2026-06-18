@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 
 	let { data, children } = $props();
@@ -24,23 +24,33 @@
 		localStorage.setItem(STORAGE_KEY, String(sidebarWidth));
 	}
 
+	// Holds the teardown for an in-flight drag so pointercancel and component
+	// destroy can both end it (otherwise window listeners + body styles leak).
+	let activeDragCleanup: (() => void) | null = null;
+
 	function startResize(e: PointerEvent) {
 		e.preventDefault();
 		const onMove = (ev: PointerEvent) => {
 			sidebarWidth = clampW(ev.clientX);
 		};
-		const onUp = () => {
+		const end = () => {
 			window.removeEventListener('pointermove', onMove);
-			window.removeEventListener('pointerup', onUp);
+			window.removeEventListener('pointerup', end);
+			window.removeEventListener('pointercancel', end);
 			document.body.style.userSelect = '';
 			document.body.style.cursor = '';
+			activeDragCleanup = null;
 			persist();
 		};
+		activeDragCleanup = end;
 		document.body.style.userSelect = 'none';
 		document.body.style.cursor = 'col-resize';
 		window.addEventListener('pointermove', onMove);
-		window.addEventListener('pointerup', onUp);
+		window.addEventListener('pointerup', end);
+		window.addEventListener('pointercancel', end);
 	}
+
+	onDestroy(() => activeDragCleanup?.());
 
 	function onHandleKey(e: KeyboardEvent) {
 		if (e.key === 'ArrowLeft') sidebarWidth = clampW(sidebarWidth - 16);

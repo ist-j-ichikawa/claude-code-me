@@ -44,8 +44,6 @@ export interface ScopeConfig {
   projectClaudeDir: string | null;
   /** Project scope: the project's own settings.json only (not merged with user). */
   settings: Record<string, unknown> | null;
-  /** Project scope only: per-top-level-key scope. */
-  settingsProvenance?: Record<string, ScopeType>;
   settingsLocal: Record<string, unknown> | null;
   claudeMd: FileRef | null;
   mcpJson: { content: Record<string, unknown> } | null;
@@ -56,8 +54,6 @@ export interface ScopeConfig {
   agents: TreeNode[];
   memory: TreeNode[];
   sessionCount: number;
-  /** Project scope only: raw user settings (pre-merge). */
-  userSettings?: Record<string, unknown> | null;
 }
 
 /** Session entry from /api/sessions */
