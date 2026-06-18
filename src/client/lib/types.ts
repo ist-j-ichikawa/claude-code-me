@@ -42,7 +42,7 @@ export interface ScopeConfig {
   claudeDir: string;
   projectCwd: string | null;
   projectClaudeDir: string | null;
-  /** Project scope: User+Project deep-merged effective values. */
+  /** Project scope: the project's own settings.json only (not merged with user). */
   settings: Record<string, unknown> | null;
   /** Project scope only: per-top-level-key scope. */
   settingsProvenance?: Record<string, ScopeType>;

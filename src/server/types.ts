@@ -52,11 +52,11 @@ export interface ScopeConfig {
   projectCwd: string | null;
   projectClaudeDir: string | null;
   /**
-   * Effective settings. For project scope this is User + Project deep-merged
-   * (project overrides user). For user scope it is the user settings as-is.
+   * For project scope, the project's OWN settings.json only (user settings still
+   * apply at runtime but are not shown here). For user scope, the user settings.
    */
   settings: Record<string, unknown> | null;
-  /** Project scope only: per-top-level-key scope after merge. */
+  /** Reserved: per-key provenance (not populated while project shows own settings only). */
   settingsProvenance?: Record<string, ScopeType>;
   settingsLocal: Record<string, unknown> | null;
   claudeMd: FileRef | null;

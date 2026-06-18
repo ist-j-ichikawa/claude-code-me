@@ -4,7 +4,7 @@ import os from "node:os";
 import type { FileZone, ScopeType, FileRef, ScopeConfig } from "./types";
 import { readJsonFile, readDirRecursive, listJsonlFiles } from "./files";
 import { resolveScope } from "./scopes";
-import { mergeTrees, mergeSettings, tagTree } from "./merge";
+import { mergeTrees, tagTree } from "./merge";
 import { isSensitiveEnvVarName } from "./env-vars";
 
 export const HOME_CLAUDE_DIR = path.join(os.homedir(), ".claude");
@@ -138,7 +138,6 @@ export function buildConfig(scopeId: string, homeClaudeDir = HOME_CLAUDE_DIR): S
     };
   }
 
-  const merged = mergeSettings(userSettings, projectSettings);
   const mergeDir = (name: string) =>
     mergeTrees(
       readDirRecursive(path.join(homeClaudeDir, name)),
@@ -151,9 +150,10 @@ export function buildConfig(scopeId: string, homeClaudeDir = HOME_CLAUDE_DIR): S
     claudeDir,
     projectCwd,
     projectClaudeDir,
-    settings: merged.effective,
-    settingsProvenance: merged.provenance,
-    userSettings,
+    // Project scope surfaces the project's OWN settings.json only (not merged with
+    // user settings). User-level config still applies at runtime, but this view is
+    // scoped to what the project itself declares.
+    settings: projectSettings,
     settingsLocal,
     claudeMd: detectClaudeMd(scope, claudeDir, projectCwd, projectClaudeDir),
     // mcpJson is intentionally not merged: project `.mcp.json` is canonical for the

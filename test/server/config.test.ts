@@ -121,7 +121,7 @@ describe("buildConfig (project scope inheritance)", () => {
     expect(same?.scope).toBe("project");
   });
 
-  it("settings は deep merge され、provenance に top-level key の scope を載せる", () => {
+  it("project scope は自前の settings.json のみを返す (user とはマージしない)", () => {
     const { homeClaudeDir, projectId, projectCwd } = setup();
     fs.writeFileSync(
       path.join(homeClaudeDir, "settings.json"),
@@ -133,16 +133,13 @@ describe("buildConfig (project scope inheritance)", () => {
     );
 
     const cfg = buildConfig(projectId, homeClaudeDir);
-    expect(cfg!.settings).toMatchObject({
-      model: "opus",
+    // 自前 settings.json のみ。user 由来の model / permissions.defaultMode は混ざらない。
+    expect(cfg!.settings).toEqual({
       effortLevel: "high",
-      permissions: { defaultMode: "ask", allow: ["Bash"] },
+      permissions: { allow: ["Bash"] },
     });
-    expect(cfg!.settingsProvenance).toEqual({
-      model: "user",
-      effortLevel: "project",
-      permissions: "project",
-    });
+    expect(cfg!.settings).not.toHaveProperty("model");
+    expect(cfg!.settingsProvenance).toBeUndefined();
   });
 
   it("user scope では settingsProvenance を返さない", () => {
