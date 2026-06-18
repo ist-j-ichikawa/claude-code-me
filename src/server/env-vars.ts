@@ -188,6 +188,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_SHELL_PREFIX", description: "シェルコマンドプレフィックス (ロギング用)" },
   { name: "CLAUDE_CODE_USE_POWERSHELL_TOOL", description: "PowerShell ツール有効化 (Windows は 2.1.143+ で Bedrock/Vertex/Foundry default 有効、`=0` で opt-out)" },
   { name: "CLAUDE_CODE_POWERSHELL_RESPECT_EXECUTION_POLICY", description: "PowerShell ツールの `-ExecutionPolicy Bypass` opt-out (2.1.143+)" },
+  { name: "CLAUDE_CLIENT_PRESENCE_FILE", description: "在席マーカーファイルのパス。指定するとマシン操作中はモバイルプッシュ通知を抑制 (2.1.181+)" },
   { name: "CLAUDE_CONFIG_DIR", description: "Claude 設定ディレクトリ override (default: ~/.claude/)" },
   { name: "CLAUDE_ENV_FILE", description: "SessionStart hook が読み込む環境変数定義ファイル" },
   { name: "CLAUDE_EFFORT", description: "Bash tool 内で参照可能な effort level (skill 内では ${CLAUDE_EFFORT})" },

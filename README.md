@@ -1,6 +1,6 @@
 # Claude Code Me（目）
 
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-v2.1.174-D97757?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iI0Q5Nzc1NyIvPjxlbGxpcHNlIGN4PSIxNiIgY3k9IjE2IiByeD0iMTIiIHJ5PSI4IiBmaWxsPSIjRkFGOUY3Ii8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iNiIgZmlsbD0iIzFhMWExYSIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjMiIGZpbGw9IiNEOTc3NTciLz48Y2lyY2xlIGN4PSIxNCIgY3k9IjE0LjUiIHI9IjEuNSIgZmlsbD0iI0ZBRjlGNyIgb3BhY2l0eT0iMC44Ii8+PC9zdmc+)](https://docs.anthropic.com/en/docs/claude-code)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-v2.1.181-D97757?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iI0Q5Nzc1NyIvPjxlbGxpcHNlIGN4PSIxNiIgY3k9IjE2IiByeD0iMTIiIHJ5PSI4IiBmaWxsPSIjRkFGOUY3Ii8+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iNiIgZmlsbD0iIzFhMWExYSIvPjxjaXJjbGUgY3g9IjE2IiBjeT0iMTYiIHI9IjMiIGZpbGw9IiNEOTc3NTciLz48Y2lyY2xlIGN4PSIxNCIgY3k9IjE0LjUiIHI9IjEuNSIgZmlsbD0iI0ZBRjlGNyIgb3BhY2l0eT0iMC44Ii8+PC9zdmc+)](https://docs.anthropic.com/en/docs/claude-code)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev/)
 [![Hono](https://img.shields.io/badge/Hono-4-E36002?logo=hono&logoColor=white)](https://hono.dev/)
