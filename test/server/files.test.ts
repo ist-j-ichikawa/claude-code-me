@@ -215,6 +215,22 @@ describe("resolveSafeFilePath", () => {
     expect(resolved).not.toBeNull();
     expect(fs.readFileSync(resolved!, "utf8")).toBe("# shared skill");
   });
+
+  it("mount 内のさらなる symlink hop (二重 symlink) でのエスケープは拒否すること", () => {
+    const base = path.join(tmp.get(), "base");
+    fs.mkdirSync(path.join(base, "skills"), { recursive: true });
+    const mountTarget = path.join(tmp.get(), "shared", "skill");
+    fs.mkdirSync(mountTarget, { recursive: true });
+    const secret = path.join(tmp.get(), "secret-area");
+    fs.mkdirSync(secret, { recursive: true });
+    fs.writeFileSync(path.join(secret, "passwd"), "secret");
+    // 1つ目: skills/sk -> shared/skill (許可される mount)
+    fs.symlinkSync(mountTarget, path.join(base, "skills", "sk"));
+    // 2つ目: shared/skill/deeper -> secret-area (mount の外へ脱出)
+    fs.symlinkSync(secret, path.join(mountTarget, "deeper"));
+
+    expect(resolveSafeFilePath(base, "skills/sk/deeper/passwd")).toBeNull();
+  });
 });
 
 describe("readDirRecursive (symlinks)", () => {

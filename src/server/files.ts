@@ -109,14 +109,35 @@ export function resolveSafeFilePath(baseDir: string, filePath: string): string |
   if (!isWithinDir(baseReal, lexicalFull)) return null;
   if (!fs.existsSync(lexicalFull)) return null;
 
-  // Block a leaf that is itself a symlink escaping the base (a direct file leak,
-  // e.g. skills/leak.md -> /etc/passwd). Intermediate *directory* symlinks are
-  // allowed, so a skill dir symlinked into ~/.claude/skills/ stays viewable.
-  if (fs.lstatSync(lexicalFull).isSymbolicLink()) {
-    const leafReal = fs.realpathSync(lexicalFull);
-    if (!isWithinDir(baseReal, leafReal)) return null;
+  const fullReal = fs.realpathSync(lexicalFull);
+  if (isWithinDir(baseReal, fullReal)) return fullReal; // no escape — normal file
+
+  // The resolved path escaped baseDir via a symlink. Allow ONLY the intended
+  // "mount" pattern: a single *directory* symlink that itself lives within base
+  // (e.g. a skill dir symlinked into ~/.claude/skills/), with the target reached
+  // without any further symlink hop, and the leaf staying inside that one target.
+  // This supports symlinked skills without blanket-trusting nested/leaf symlinks
+  // (a path-traversal vector flagged in review).
+  const parts = path.relative(baseReal, lexicalFull).split(path.sep);
+  let cur = baseReal;
+  let mount: string | null = null;
+  for (const part of parts) {
+    cur = path.join(cur, part);
+    let lst: fs.Stats;
+    try {
+      lst = fs.lstatSync(cur);
+    } catch {
+      return null;
+    }
+    if (lst.isSymbolicLink()) {
+      if (mount) return null; // a second symlink hop — reject
+      const target = fs.realpathSync(cur);
+      if (!fs.statSync(target).isDirectory()) return null; // file symlink (leak) — reject
+      mount = target;
+      cur = target; // continue resolving within the mounted directory
+    }
   }
-  return lexicalFull;
+  return mount && isWithinDir(mount, fullReal) ? fullReal : null;
 }
 
 /**
