@@ -200,4 +200,38 @@ describe("resolveSafeFilePath", () => {
 
     expect(resolveSafeFilePath(base, "leak.md")).toBeNull();
   });
+
+  it("ディレクトリ symlink 経由の実ファイルは配信できること (symlink skill 対応)", () => {
+    const base = path.join(tmp.get(), "base");
+    fs.mkdirSync(path.join(base, "skills"), { recursive: true });
+    // base 外に実体のスキルディレクトリ
+    const realSkill = path.join(tmp.get(), "shared", "html-output");
+    fs.mkdirSync(realSkill, { recursive: true });
+    fs.writeFileSync(path.join(realSkill, "SKILL.md"), "# shared skill");
+    // base 内にディレクトリ symlink を張る (ユーザーが意図的に張る skill symlink)
+    fs.symlinkSync(realSkill, path.join(base, "skills", "html-output"));
+
+    const resolved = resolveSafeFilePath(base, "skills/html-output/SKILL.md");
+    expect(resolved).not.toBeNull();
+    expect(fs.readFileSync(resolved!, "utf8")).toBe("# shared skill");
+  });
+});
+
+describe("readDirRecursive (symlinks)", () => {
+  const tmp = useTmpDir();
+
+  it("ディレクトリへの symlink を type=dir + children として辿ること", () => {
+    const root = tmp.get();
+    const realSkill = path.join(root, "shared", "html-output");
+    fs.mkdirSync(realSkill, { recursive: true });
+    fs.writeFileSync(path.join(realSkill, "SKILL.md"), "# shared");
+    const skillsDir = path.join(root, "home", "skills");
+    fs.mkdirSync(skillsDir, { recursive: true });
+    fs.symlinkSync(realSkill, path.join(skillsDir, "html-output"));
+
+    const tree = readDirRecursive(skillsDir);
+    const linked = tree.find((n) => n.name === "html-output");
+    expect(linked?.type).toBe("dir");
+    expect(linked?.children?.some((c) => c.name === "SKILL.md")).toBe(true);
+  });
 });

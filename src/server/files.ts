@@ -30,7 +30,7 @@ export function listJsonlFiles(dir: string): string[] {
 }
 
 /** Recursively build a tree of files and directories. Skips dotfiles (.DS_Store, .git, etc.). */
-export function readDirRecursive(dir: string, base = ""): TreeNode[] {
+export function readDirRecursive(dir: string, base = "", seen: Set<string> = new Set()): TreeNode[] {
   const items: TreeNode[] = [];
   let entries: fs.Dirent[];
   try {
@@ -42,20 +42,31 @@ export function readDirRecursive(dir: string, base = ""): TreeNode[] {
     if (entry.name.startsWith(".")) continue;
     const rel = path.join(base, entry.name);
     const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
+    // statSync (not Dirent.isDirectory) so symlinked dirs — e.g. a skill symlinked
+    // into ~/.claude/skills/ — are recursed as directories, not listed as files.
+    let stat: fs.Stats;
+    try {
+      stat = fs.statSync(full);
+    } catch {
+      continue; // broken symlink / unreadable
+    }
+    if (stat.isDirectory()) {
+      // Guard against symlink cycles by tracking resolved real paths.
+      let real: string;
+      try {
+        real = fs.realpathSync(full);
+      } catch {
+        real = full;
+      }
+      if (seen.has(real)) continue;
       items.push({
         name: entry.name,
         path: rel,
         type: "dir",
-        children: readDirRecursive(full, rel),
+        children: readDirRecursive(full, rel, new Set(seen).add(real)),
       });
     } else {
-      try {
-        const stat = fs.statSync(full);
-        items.push({ name: entry.name, path: rel, type: "file", size: stat.size });
-      } catch {
-        /* skip unreadable */
-      }
+      items.push({ name: entry.name, path: rel, type: "file", size: stat.size });
     }
   }
   return items;
@@ -92,8 +103,20 @@ export function resolveSafeFilePath(baseDir: string, filePath: string): string |
   if (isTraversal(normalized)) return null;
 
   const baseReal = fs.realpathSync(baseDir);
-  const fullReal = fs.realpathSync(path.resolve(path.join(baseDir, normalized)));
-  return isWithinDir(baseReal, fullReal) ? fullReal : null;
+  // Lexical resolution (symlinks NOT followed here). `..`/absolute are already
+  // rejected, so this path stays within the base tree lexically.
+  const lexicalFull = path.resolve(baseReal, normalized);
+  if (!isWithinDir(baseReal, lexicalFull)) return null;
+  if (!fs.existsSync(lexicalFull)) return null;
+
+  // Block a leaf that is itself a symlink escaping the base (a direct file leak,
+  // e.g. skills/leak.md -> /etc/passwd). Intermediate *directory* symlinks are
+  // allowed, so a skill dir symlinked into ~/.claude/skills/ stays viewable.
+  if (fs.lstatSync(lexicalFull).isSymbolicLink()) {
+    const leafReal = fs.realpathSync(lexicalFull);
+    if (!isWithinDir(baseReal, leafReal)) return null;
+  }
+  return lexicalFull;
 }
 
 /**
