@@ -44,21 +44,24 @@
 	let stats: Stat[] = $derived(
 		isUser
 			? [
+					// Order follows the official docs: Hooks > MCP > Skills > Plugins ...
 					{ label: 'Hooks', value: hooksCount, anchor: '#hooks' },
-					{ label: 'Skills', value: skillsCount, anchor: '#skills' },
 					{ label: 'MCP', value: mcpCount, anchor: '#mcp-servers' },
+					{ label: 'Skills', value: skillsCount, anchor: '#skills' },
 					{ label: 'Plugins', value: pluginsCount, anchor: '#plugins' },
 					{ label: 'Env', value: envCount, anchor: '#env' },
 					{ label: 'History', value: historyCount, anchor: '#history' },
 				]
 			: [
-					{ label: 'Sessions', value: config.sessionCount, anchor: '#sessions' },
+					// Shared concepts keep the same relative order as the user scope
+					// (Hooks > Skills ...); Sessions is project-specific and shown last.
 					{ label: 'Hooks', value: hooksCount, anchor: '#hooks' },
-					{ label: 'Rules', value: rulesCount, anchor: '#rules' },
-					{ label: 'Commands', value: commandsCount, anchor: '#commands' },
-					{ label: 'Agents', value: agentsCount, anchor: '#agents' },
 					{ label: 'Skills', value: skillsCount, anchor: '#skills' },
+					{ label: 'Agents', value: agentsCount, anchor: '#agents' },
+					{ label: 'Commands', value: commandsCount, anchor: '#commands' },
+					{ label: 'Rules', value: rulesCount, anchor: '#rules' },
 					{ label: 'Memory', value: memoryCount, anchor: '#memory' },
+					{ label: 'Sessions', value: config.sessionCount, anchor: '#sessions' },
 				],
 	);
 
@@ -107,10 +110,10 @@
 		<PermissionsSection {config} />
 		<HooksSection {config} />
 		<McpSection {config} />
-		<CommandsSection {config} {scopeId} />
-		<AgentsSection {config} {scopeId} />
-		<RulesSection {config} {scopeId} />
 		<SkillsSection {config} {scopeId} />
+		<AgentsSection {config} {scopeId} />
+		<CommandsSection {config} {scopeId} />
+		<RulesSection {config} {scopeId} />
 		<MemorySection {config} {scopeId} />
 		{#if data.sessions}
 			<SessionsSection sessions={data.sessions} />
