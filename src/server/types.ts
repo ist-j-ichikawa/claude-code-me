@@ -16,6 +16,9 @@ export interface Scope {
 /** Resolved scope paths */
 export interface ResolvedScope {
   scope: ScopeType;
+  /** Always ~/.claude. The "user" file zone resolves here regardless of the active scope. */
+  homeClaudeDir: string;
+  /** For a project scope this is the session dir (~/.claude/projects/<id>), NOT ~/.claude. */
   claudeDir: string;
   projectCwd: string | null;
   projectClaudeDir: string | null;

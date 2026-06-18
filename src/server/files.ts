@@ -105,14 +105,17 @@ export function resolveSafeFilePath(baseDir: string, filePath: string): string |
  * Rejects path traversal attempts (.. or absolute paths).
  */
 export function resolveScopeDir(
-  resolved: Pick<ResolvedScope, "claudeDir" | "projectCwd" | "projectClaudeDir">,
+  resolved: Pick<ResolvedScope, "homeClaudeDir" | "claudeDir" | "projectCwd" | "projectClaudeDir">,
   scope: FileZone | string,
   filePath: string,
 ): string | null {
   const normalized = path.normalize(filePath);
   if (isTraversal(normalized)) return null;
 
-  if (scope === "user") return resolved.claudeDir;
+  // "user" zone is always ~/.claude. For a project scope, resolved.claudeDir is the
+  // session dir (~/.claude/projects/<id>), so user-sourced (inherited) skills/commands/
+  // agents/rules must resolve against homeClaudeDir — otherwise their file links 404.
+  if (scope === "user") return resolved.homeClaudeDir;
   if (scope === "parent") {
     return PROJECT_ROOT_ALLOWLIST.has(normalized) && resolved.projectCwd ? resolved.projectCwd : null;
   }

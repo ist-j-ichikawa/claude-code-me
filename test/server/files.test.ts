@@ -120,13 +120,17 @@ describe("readJsonFile", () => {
 describe("resolveScopeDir", () => {
   const resolved = {
     scope: "project" as const,
+    homeClaudeDir: "/home/.claude",
     claudeDir: "/home/.claude/projects/foo",
     projectCwd: "/home/projects/foo",
     projectClaudeDir: "/home/projects/foo/.claude",
   };
 
-  it("scope=user は claudeDir を返す", () => {
-    expect(resolveScopeDir(resolved, "user", "any-file")).toBe(resolved.claudeDir);
+  it("scope=user は home ~/.claude を返す (project scope でも session dir に解決しない)", () => {
+    // user zone は常に home。project scope の claudeDir はセッション保存先なので
+    // そこに解決すると user 由来の skill/command 等が 404 になる (regression guard)。
+    expect(resolveScopeDir(resolved, "user", "any-file")).toBe(resolved.homeClaudeDir);
+    expect(resolveScopeDir(resolved, "user", "any-file")).not.toBe(resolved.claudeDir);
   });
 
   it("scope=project は projectClaudeDir を返す", () => {
