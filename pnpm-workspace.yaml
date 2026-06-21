@@ -1,0 +1,7 @@
+# pnpm 11 はビルドスクリプト未承認の依存があると ERR_PNPM_IGNORED_BUILDS で
+# install を exit 1 にする (pnpm 10 までは警告のみ)。esbuild の postinstall を
+# 承認しないと新規クローンで pnpm install が失敗し pnpm dev が起動しない。
+# pnpm 11 の承認キーは allowBuilds (package.json の pnpm.onlyBuiltDependencies は
+# pnpm 11 では効かない)。
+allowBuilds:
+  esbuild: true
