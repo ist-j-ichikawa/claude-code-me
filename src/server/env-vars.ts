@@ -76,7 +76,8 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_GLOB_TIMEOUT_SECONDS", description: "Glob ツールタイムアウト (秒)" },
   { name: "CLAUDE_CODE_MAX_CONTEXT_TOKENS", description: "コンテキストウィンドウサイズ上書き" },
   { name: "CLAUDE_CODE_MAX_OUTPUT_TOKENS", description: "最大出力トークン数" },
-  { name: "CLAUDE_CODE_MAX_RETRIES", description: "API リクエスト最大リトライ回数 (default 10)" },
+  { name: "CLAUDE_CODE_MAX_RETRIES", description: "API リクエスト最大リトライ回数 (default 10、上限は 2.1.186+ で 15)" },
+  { name: "CLAUDE_CODE_RETRY_WATCHDOG", description: "無人セッション向けリトライウォッチドッグ (2.1.186 で CLAUDE_CODE_MAX_RETRIES の代替として案内)" },
   { name: "CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY", description: "ツール最大並列実行数 (default 10)" },
   { name: "CLAUDE_CODE_OTEL_FLUSH_TIMEOUT_MS", description: "OpenTelemetry フラッシュタイムアウト" },
   { name: "CLAUDE_CODE_OTEL_HEADERS_HELPER_DEBOUNCE_MS", description: "OTel ヘッダーリフレッシュ間隔" },
@@ -91,6 +92,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_ACCESSIBILITY", description: "アクセシビリティモード (カーソル表示)" },
   { name: "CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN", description: "全画面レンダリング無効化" },
   { name: "CLAUDE_CODE_DISABLE_MOUSE", description: "マウストラッキング無効化" },
+  { name: "CLAUDE_CODE_DISABLE_MOUSE_CLICKS", description: "全画面モードでマウスのクリック/ドラッグ/ホバーを無効化 (ホイールスクロールは維持、2.1.195+)" },
   { name: "CLAUDE_CODE_DISABLE_TERMINAL_TITLE", description: "ターミナルタイトル更新無効化" },
   { name: "CLAUDE_CODE_DISABLE_VIRTUAL_SCROLL", description: "仮想スクロール無効化" },
   { name: "CLAUDE_CODE_HIDE_CWD", description: "スタートアップロゴの作業ディレクトリ非表示" },
@@ -110,6 +112,8 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "DISABLE_UPDATES", description: "全ての update path をブロック (manual `claude update` 含む、2.1.135+)" },
   { name: "OTEL_LOG_RAW_API_BODIES", description: "API リクエスト/レスポンスボディを OTel ログとして出力" },
   { name: "OTEL_LOG_TOOL_DETAILS", description: "tool_decision テレメトリに tool_parameters (bash コマンド、MCP/skill 名) を含める (2.1.157+)" },
+  { name: "OTEL_LOG_USER_PROMPTS", description: "ユーザープロンプト内容を OTel ログ (user_prompt イベント) に含める" },
+  { name: "OTEL_LOG_ASSISTANT_RESPONSES", description: "アシスタント応答テキストを OTel ログ (assistant_response イベント) に含める。未設定時は OTEL_LOG_USER_PROMPTS に従う (2.1.193+)" },
   { name: "OTEL_METRICS_INCLUDE_ENTRYPOINT", description: "session entrypoint を OTel メトリクス属性 (app.entrypoint) に追加 (2.1.152+)" },
   { name: "OTEL_RESOURCE_ATTRIBUTES", description: "OTel リソース属性をメトリクスのラベルに付与 (team/repo 等でスライス、ラベル付与は 2.1.161+)" },
 
@@ -119,6 +123,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_DISABLE_ATTACHMENTS", description: "ファイル添付処理無効化" },
   { name: "CLAUDE_CODE_DISABLE_AUTO_MEMORY", description: "オートメモリ無効化" },
   { name: "CLAUDE_CODE_DISABLE_BACKGROUND_TASKS", description: "バックグラウンドタスク無効化" },
+  { name: "CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP", description: "アイドルなバックグラウンドシェルコマンドのメモリ圧迫時自動 reaping を無効化 (=1、2.1.193+)" },
   { name: "CLAUDE_CODE_DISABLE_CLAUDE_MDS", description: "CLAUDE.md メモリファイル無効化" },
   { name: "CLAUDE_CODE_DISABLE_CRON", description: "スケジュール済みタスク無効化" },
   { name: "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS", description: "実験的ベータ無効化" },
@@ -224,6 +229,7 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   // --- MCP ---
   { name: "ENABLE_TOOL_SEARCH", description: "MCP ツール検索有効化" },
   { name: "MCP_TOOL_TIMEOUT", description: "MCP ツール呼び出しのタイムアウト (ms、per-server timeout 未設定時のフォールバック)" },
+  { name: "CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT", description: "リモート MCP ツール呼び出しのアイドルタイムアウト override (応答なしで abort する挙動は 2.1.187+)" },
 ];
 
 const SENSITIVE_ENV_NAME_PATTERN =
