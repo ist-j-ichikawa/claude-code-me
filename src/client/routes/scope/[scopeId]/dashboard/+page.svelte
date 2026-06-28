@@ -91,13 +91,13 @@
 			<ClaudeMdSection claudeMd={config.claudeMd} {scopeId} />
 		{/if}
 		<SettingsSection {config} />
+		{#if data.env}
+			<EnvSection entries={data.env} />
+		{/if}
 		<HooksSection {config} />
 		<McpSection {config} />
 		<SkillsSection {config} {scopeId} />
 		<PluginsSection {config} />
-		{#if data.env}
-			<EnvSection entries={data.env} />
-		{/if}
 		{#if data.history}
 			<HistorySection entries={data.history} />
 		{/if}

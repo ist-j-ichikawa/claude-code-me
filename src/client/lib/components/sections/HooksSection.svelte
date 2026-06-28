@@ -3,7 +3,7 @@
 	import { HOOK_EVENTS } from '$lib/hooks';
 	import type { ScopeConfig } from '$lib/types';
 
-	type HookEntry = { type?: string; command?: string; url?: string; timeout?: number };
+	type HookEntry = { type?: string; command?: string; url?: string; timeout?: number; if?: string };
 	type HandlerGroup = { matcher?: string; hooks?: HookEntry[] };
 
 	let { config }: { config: ScopeConfig } = $props();
@@ -35,6 +35,9 @@
 										<span class="timeout">{h.timeout}ms</span>
 									{/if}
 								</div>
+								{#if h.if}
+									<div class="hook-if"><span class="label">if:</span> <code>{h.if}</code></div>
+								{/if}
 							{/each}
 						</div>
 					{/each}
@@ -88,6 +91,9 @@
 	.matcher { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
 	.label { color: var(--text-tertiary); }
 	.matcher code { font-family: var(--font-code); font-size: 11px; background: var(--bg); padding: 1px 4px; border-radius: 3px; }
+
+	.hook-if { font-size: 11px; color: var(--text-secondary); margin: 2px 0 6px 8px; }
+	.hook-if code { font-family: var(--font-code); background: var(--bg); padding: 1px 4px; border-radius: 3px; }
 
 	.handler {
 		display: flex;

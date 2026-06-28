@@ -99,6 +99,8 @@
 		},
 	];
 
+	const isComplex = (v: unknown): boolean => typeof v === 'object' && v !== null;
+
 	function fmt(v: unknown): string {
 		if (v === null || v === undefined) return '';
 		if (typeof v === 'boolean') return v ? 'true' : 'false';
@@ -228,7 +230,15 @@
 
 	{#if otherEntries.length > 0}
 		<h4>Other</h4>
-		<InfoGrid items={otherEntries.map(([k, v]) => ({ label: k, value: fmt(v) }))} />
+		{@const scalarOthers = otherEntries.filter(([, v]) => !isComplex(v))}
+		{@const complexOthers = otherEntries.filter(([, v]) => isComplex(v))}
+		<InfoGrid items={scalarOthers.map(([k, v]) => ({ label: k, value: fmt(v) }))} />
+		{#each complexOthers as [k, v]}
+			<div class="other-complex">
+				<div class="other-label">{k}</div>
+				<pre class="json-view">{JSON.stringify(v, null, 2)}</pre>
+			</div>
+		{/each}
 	{/if}
 </Section>
 
@@ -240,6 +250,9 @@
 	.subsection-label.allow { color: var(--success); }
 	.subsection-label.deny { color: #c53030; }
 	.badge { font-size: 12px; padding: 2px 8px; border-radius: 4px; background: var(--info-light); color: var(--info); }
+	.other-complex { margin-bottom: 12px; }
+	.other-complex:last-child { margin-bottom: 0; }
+	.other-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: 4px; }
 	.json-view {
 		font-family: var(--font-code);
 		font-size: 12px;
