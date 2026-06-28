@@ -232,8 +232,11 @@ export const CLAUDE_CODE_ENV_VARS: readonly EnvVarDef[] = [
   { name: "CLAUDE_CODE_MCP_TOOL_IDLE_TIMEOUT", description: "リモート MCP ツール呼び出しのアイドルタイムアウト override (応答なしで abort する挙動は 2.1.187+)" },
 ];
 
+// Name-based heuristic (best-effort, not exhaustive): masks segment-delimited
+// secret-ish tokens. Bare KEY subsumes API_KEY/ACCESS_KEY/SESSION_KEY etc.;
+// erring toward over-masking (e.g. CACHE_KEY) is preferred to leaking a value.
 const SENSITIVE_ENV_NAME_PATTERN =
-  /(^|_)(API_?KEY|TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIALS?|PRIVATE_?KEY|CLIENT_?KEY|CERT|COOKIE|AUTHORIZATION)($|_)/i;
+  /(^|_)(KEY|API_?KEY|TOKEN|SECRET|PASSWORD|PASSWD|PASSPHRASE|CREDENTIALS?|PRIVATE_?KEY|CLIENT_?KEY|PAT|CERT|COOKIE|AUTHORIZATION)($|_)/i;
 
 export function isSensitiveEnvVarName(name: string): boolean {
   return (

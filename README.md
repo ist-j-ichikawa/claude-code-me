@@ -89,4 +89,4 @@ dist/                 Production build output (gitignored)
 - **読み取り専用**: 書き込み API なし
 - **localhost のみ**: 外部アクセス不可。許可ディレクトリ外のファイルは読まない
 - **ファイル境界チェック**: path traversal と symlink escape を realpath ベースで拒否
-- **機密値マスク**: `settings.env` / MCP `env` などの API キー・トークン系は値を表示しない
+- **機密値マスク**: `settings.env` / MCP `env` の API キー・トークン系を名前ベースのヒューリスティックでマスク（`KEY` / `TOKEN` / `SECRET` / `PASSWORD` / `PAT` 等を含む名前。ベストエフォートで全件保証ではない）

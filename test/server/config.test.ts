@@ -155,16 +155,21 @@ describe("buildConfig (project scope inheritance)", () => {
       JSON.stringify({
         env: {
           ANTHROPIC_API_KEY: "secret-api-key",
+          // Names without an API_KEY/PRIVATE_KEY prefix still match the bare
+          // KEY/PAT heuristic — guards the masking gap they used to slip through.
+          OPENAI_KEY: "sk-should-be-masked",
+          GH_PAT: "ghp_should-be-masked",
           ANTHROPIC_BASE_URL: "https://api.example.test",
         },
       }),
     );
 
     const cfg = buildConfig("user", homeClaudeDir);
-    expect((cfg!.settings!.env as Record<string, string>).ANTHROPIC_API_KEY).toBe("<set>");
-    expect((cfg!.settings!.env as Record<string, string>).ANTHROPIC_BASE_URL).toBe(
-      "https://api.example.test",
-    );
+    const env = cfg!.settings!.env as Record<string, string>;
+    expect(env.ANTHROPIC_API_KEY).toBe("<set>");
+    expect(env.OPENAI_KEY).toBe("<set>");
+    expect(env.GH_PAT).toBe("<set>");
+    expect(env.ANTHROPIC_BASE_URL).toBe("https://api.example.test");
   });
 
   it("MCP server env の機密値をマスクする", () => {
@@ -177,6 +182,7 @@ describe("buildConfig (project scope inheritance)", () => {
             command: "node",
             env: {
               CUSTOM_TOKEN: "secret-token",
+              STRIPE_KEY: "sk-should-be-masked",
               PUBLIC_FLAG: "visible",
             },
           },
@@ -189,6 +195,7 @@ describe("buildConfig (project scope inheritance)", () => {
       mcpServers: Record<string, { env: Record<string, string> }>;
     };
     expect(mcp.mcpServers.local.env.CUSTOM_TOKEN).toBe("<set>");
+    expect(mcp.mcpServers.local.env.STRIPE_KEY).toBe("<set>");
     expect(mcp.mcpServers.local.env.PUBLIC_FLAG).toBe("visible");
   });
 });
