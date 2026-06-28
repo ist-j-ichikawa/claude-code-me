@@ -6,8 +6,7 @@
 	line-height: 1.65;
 	color: var(--text-secondary);
 	word-break: break-word;
-	/* Cap prose line length for readability; the surrounding layout stays fluid. */
-	max-width: 820px;
+	/* Fill the card; overall line length is bounded by the content column (.content-col). */
 }
 
 .markdown-body > :first-child {

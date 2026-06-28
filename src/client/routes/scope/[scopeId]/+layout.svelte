@@ -86,7 +86,11 @@
 		ondblclick={() => { sidebarWidth = DEFAULT_W; persist(); }}
 	></div>
 	<main class="main-content">
-		{@render children()}
+		<!-- Cap the content column so cards (and markdown line length, which now
+		     fills the card) don't stretch to unreadable widths on large monitors. -->
+		<div class="content-col">
+			{@render children()}
+		</div>
 	</main>
 </div>
 
@@ -102,6 +106,10 @@
 		padding: 32px 40px;
 		overflow-y: auto;
 		min-width: 0;
+	}
+
+	.content-col {
+		max-width: 1100px;
 	}
 
 	/* Drag-to-resize handle sitting on the sidebar/content boundary. */
