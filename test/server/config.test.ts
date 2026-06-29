@@ -198,4 +198,40 @@ describe("buildConfig (project scope inheritance)", () => {
     expect(mcp.mcpServers.local.env.STRIPE_KEY).toBe("<set>");
     expect(mcp.mcpServers.local.env.PUBLIC_FLAG).toBe("visible");
   });
+
+  it("hook の http headers の機密値を（ハイフン区切り名でも）マスクする", () => {
+    const { homeClaudeDir } = setup();
+    fs.writeFileSync(
+      path.join(homeClaudeDir, "settings.json"),
+      JSON.stringify({
+        hooks: {
+          PreToolUse: [
+            {
+              matcher: "Bash",
+              hooks: [
+                {
+                  type: "http",
+                  url: "http://localhost/h",
+                  headers: {
+                    // hyphen-delimited header names must still match the heuristic
+                    "X-Api-Key": "sk-should-be-masked",
+                    Authorization: "Bearer should-be-masked",
+                    "Content-Type": "application/json",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    );
+
+    const cfg = buildConfig("user", homeClaudeDir);
+    const headers = (
+      cfg!.settings!.hooks as Record<string, { hooks: { headers: Record<string, string> }[] }[]>
+    ).PreToolUse[0].hooks[0].headers;
+    expect(headers["X-Api-Key"]).toBe("<set>");
+    expect(headers.Authorization).toBe("<set>");
+    expect(headers["Content-Type"]).toBe("application/json");
+  });
 });

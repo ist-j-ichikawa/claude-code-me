@@ -239,8 +239,11 @@ const SENSITIVE_ENV_NAME_PATTERN =
   /(^|_)(KEY|API_?KEY|TOKEN|SECRET|PASSWORD|PASSWD|PASSPHRASE|CREDENTIALS?|PRIVATE_?KEY|CLIENT_?KEY|PAT|CERT|COOKIE|AUTHORIZATION)($|_)/i;
 
 export function isSensitiveEnvVarName(name: string): boolean {
+  // Normalize hyphen-delimited names to underscore so HTTP header keys like
+  // `X-Api-Key` / `X-Auth-Token` (hooks `headers`) match the same heuristic.
+  const normalized = name.replace(/-/g, "_");
   return (
     CLAUDE_CODE_ENV_VARS.some((def) => def.name === name && def.sensitive) ||
-    SENSITIVE_ENV_NAME_PATTERN.test(name)
+    SENSITIVE_ENV_NAME_PATTERN.test(normalized)
   );
 }
