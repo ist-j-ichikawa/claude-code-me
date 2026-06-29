@@ -1,9 +1,8 @@
 <script lang="ts">
 	import Section from '../Section.svelte';
-	import { HOOK_EVENTS } from '$lib/hooks';
+	import { HOOK_EVENTS, hookType, hookPrimaryValue, hookRestFields, type HookEntry } from '$lib/hooks';
 	import type { ScopeConfig } from '$lib/types';
 
-	type HookEntry = { type?: string; command?: string; url?: string; timeout?: number; if?: string };
 	type HandlerGroup = { matcher?: string; hooks?: HookEntry[] };
 
 	let { config }: { config: ScopeConfig } = $props();
@@ -28,16 +27,15 @@
 								<div class="matcher"><span class="label">matcher:</span> <code>{group.matcher}</code></div>
 							{/if}
 							{#each group.hooks ?? [] as h}
+								{@const primary = hookPrimaryValue(h)}
+								{@const rest = hookRestFields(h)}
 								<div class="handler">
-									<span class="type">{h.type ?? 'command'}</span>
-									<code class="cmd">{h.command ?? h.url ?? ''}</code>
-									{#if h.timeout}
-										<span class="timeout">{h.timeout}ms</span>
-									{/if}
+									<span class="type">{hookType(h)}</span>
+									{#if primary}<code class="cmd">{primary}</code>{/if}
 								</div>
-								{#if h.if}
-									<div class="hook-if"><span class="label">if:</span> <code>{h.if}</code></div>
-								{/if}
+								{#each rest as [k, v]}
+									<div class="hook-field"><span class="label">{k}:</span> <code>{v}</code></div>
+								{/each}
 							{/each}
 						</div>
 					{/each}
@@ -92,8 +90,8 @@
 	.label { color: var(--text-tertiary); }
 	.matcher code { font-family: var(--font-code); font-size: 11px; background: var(--bg); padding: 1px 4px; border-radius: 3px; }
 
-	.hook-if { font-size: 11px; color: var(--text-secondary); margin: 2px 0 6px 8px; }
-	.hook-if code { font-family: var(--font-code); background: var(--bg); padding: 1px 4px; border-radius: 3px; }
+	.hook-field { font-size: 11px; color: var(--text-secondary); margin: 2px 0 6px 8px; }
+	.hook-field code { font-family: var(--font-code); background: var(--bg); padding: 1px 4px; border-radius: 3px; word-break: break-all; }
 
 	.handler {
 		display: flex;
@@ -123,11 +121,5 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-	}
-
-	.timeout {
-		font-size: 11px;
-		color: var(--text-tertiary);
-		font-family: var(--font-code);
 	}
 </style>

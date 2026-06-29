@@ -1,3 +1,65 @@
+/**
+ * A single configured hook entry (an item in a matcher group's `hooks` array).
+ * Open-ended on purpose: we render known fields specially and surface the rest
+ * generically, so fields added by future Claude Code versions are never
+ * silently dropped. Schema: https://code.claude.com/docs/en/hooks
+ */
+export type HookEntry = Record<string, unknown> & { type?: string };
+
+/**
+ * Per-type "what runs" field(s). The value(s) here are shown as the entry's
+ * primary line; every other key is surfaced generically by hookRestFields.
+ * command → command · http → url · mcp_tool → server/tool · prompt|agent → prompt
+ */
+const HOOK_PRIMARY_FIELDS: Record<string, string[]> = {
+  command: ["command"],
+  http: ["url"],
+  mcp_tool: ["server", "tool"],
+  prompt: ["prompt"],
+  agent: ["prompt"],
+};
+
+const HOOK_PRIMARY_FALLBACK = ["command", "url", "prompt"];
+
+export function hookType(h: HookEntry): string {
+  return typeof h.type === "string" ? h.type : "command";
+}
+
+const present = (v: unknown): boolean => v != null && v !== "";
+
+/**
+ * The keys whose values form the primary descriptor — the type's own fields if
+ * any are present, else the generic fallback (so a mistyped/typeless entry still
+ * shows something). Shared by hookPrimaryValue and hookRestFields so the primary
+ * value is never ALSO repeated as a generic field.
+ */
+function primaryKeys(h: HookEntry): string[] {
+  const keys = HOOK_PRIMARY_FIELDS[hookType(h)] ?? HOOK_PRIMARY_FALLBACK;
+  return keys.some((k) => present(h[k])) ? keys : HOOK_PRIMARY_FALLBACK;
+}
+
+/** The hook's primary descriptor (command / url / server·tool / prompt). */
+export function hookPrimaryValue(h: HookEntry): string {
+  return primaryKeys(h)
+    .map((k) => h[k])
+    .filter(present)
+    .map(String)
+    .join(" · ");
+}
+
+/**
+ * Every entry field not already consumed by the primary value, as label/value
+ * pairs (objects JSON-stringified). This is the catch-all that keeps the view
+ * field-complete across Claude Code upgrades: `if`, `timeout`, `model`,
+ * `headers`, `async`, and any not-yet-known field all surface here.
+ */
+export function hookRestFields(h: HookEntry): [string, string][] {
+  const consumed = new Set(["type", ...primaryKeys(h)]);
+  return Object.entries(h)
+    .filter(([k, v]) => !consumed.has(k) && present(v))
+    .map(([k, v]) => [k, typeof v === "object" ? JSON.stringify(v) : String(v)] as [string, string]);
+}
+
 /** ツール名にマッチする hook の matcher 候補（PreToolUse / PostToolUse / PostToolUseFailure / PermissionRequest 共通）。 */
 const TOOL_MATCHERS = ["Bash", "Write", "Edit", "Read", "Glob", "Grep", "WebFetch", "Task", "mcp__*"];
 
