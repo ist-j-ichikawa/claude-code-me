@@ -14,7 +14,7 @@
 			{@const f = item as TreeNode}
 			{@const scope = f.scope}
 			<tr class="clickable" onclick={() => { window.location.hash = `#/scope/${scopeId}/file/${scope}:commands/${f.name}`; }}>
-				<td style="font-weight:500;color:var(--text)">/{f.name.replace('.md', '')} <ScopeBadge scope={f.scope} /></td>
+				<td style="font-weight:500;color:var(--text)">/{f.name.replace('.md', '')} <ScopeBadge scope={f.scope} {scopeId} /></td>
 				<td class="file-path">{f.name}</td>
 			</tr>
 		{/snippet}

@@ -15,7 +15,7 @@
 			{@const mdFile = (f.children ?? []).find((c) => c.name.endsWith('.md'))}
 			{@const scope = f.scope}
 			<tr class="clickable" onclick={() => { if (mdFile) window.location.hash = `#/scope/${scopeId}/file/${scope}:skills/${f.name}/${mdFile.name}`; }}>
-				<td style="font-weight:500;color:var(--text)">{f.name} <ScopeBadge scope={f.scope} /></td>
+				<td style="font-weight:500;color:var(--text)">{f.name} <ScopeBadge scope={f.scope} {scopeId} /></td>
 				<td class="file-path">{mdFile?.name ?? ''}</td>
 			</tr>
 		{/snippet}

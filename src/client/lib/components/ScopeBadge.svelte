@@ -1,10 +1,15 @@
 <script lang="ts">
 	import type { ScopeType } from '$lib/types';
 
-	let { scope }: { scope: ScopeType | undefined } = $props();
+	let { scope, scopeId }: { scope: ScopeType | undefined; scopeId?: string } = $props();
+
+	// In the user scope every item is user-scoped, so a "USER" badge is just
+	// redundant noise. Only show it where it disambiguates — the project scope,
+	// which mixes inherited-user and project-defined items.
+	let show = $derived(!!scope && scopeId !== 'user');
 </script>
 
-{#if scope}
+{#if show}
 	<span class="badge {scope}" title={scope === 'user' ? 'User スコープから継承' : 'このプロジェクトで定義'}>
 		{scope === 'user' ? 'USER' : 'PROJECT'}
 	</span>
