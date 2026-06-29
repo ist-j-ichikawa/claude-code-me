@@ -15,7 +15,7 @@
 
 <Section title="Env" id="env" flat>
 	<p class="hint">
-		<a href="https://code.claude.com/docs/en/env-vars" target="_blank" rel="noopener">Claude Code 環境変数</a> /
+		<a href="https://code.claude.com/docs/en/env-vars" target="_blank" rel="noopener">Claude Code 環境変数</a>:
 		<code>process.env</code> + <code>~/.claude/settings.json</code> の <code>env</code> をマージ
 	</p>
 
