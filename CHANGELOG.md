@@ -8,6 +8,25 @@ Claude Code Me（目）の変更履歴。
 
 ## [Unreleased]
 
+### Added
+
+- Hooks: 全 hook タイプ（command / http / mcp_tool / prompt / agent）のフィールドを完全表示。`if` 条件や未知のフィールドも自動で表示するため、Claude Code のバージョンアップで増えたフィールドを取りこぼさない
+
+### Changed
+
+- ダッシュボードのコンテンツ幅を上限 1100px に統一し、CLAUDE.md 等の本文がカード幅を満たすように（ワイド画面で右側が大きく空く問題を解消）
+- Settings: 一般項目をラベル / 値の縦整列リストに、「Other」の複雑な値（配列・オブジェクト）を整形済み JSON ブロックで表示
+- Env セクションを Settings の直下に移動（User スコープ）
+- User スコープでは冗長な "USER" バッジを非表示（Project スコープでは継承元の判別用に表示）
+
+### Fixed
+
+- Hooks: `if` 条件を表示し、条件だけが異なる hook が重複して見える問題を解消。timeout の単位誤表記（秒値に `ms`）を修正
+
+### Security
+
+- 機密値マスクの対象名を拡充（`KEY` / `PAT` / `PASSPHRASE` 等を含む名前、およびハイフン区切りのヘッダ名 `X-Api-Key` 等）。README のマスク記述を実態に合わせ「名前ベースのベストエフォート（全件保証ではない）」と明記
+
 ## 2026-06-28 — Claude Code v2.1.195 追従
 
 ### Added
